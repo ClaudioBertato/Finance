@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portafoglio PIR</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root { --bg:#0b1020; --panel:#11182c; --panel-2:#16203a; --border:rgba(255,255,255,.08); --text:#f8fafc; --muted:#94a3b8; --accent:#60a5fa; --green:#22c55e; --shadow:0 20px 60px rgba(0,0,0,.28); }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:radial-gradient(circle at 15% 10%,rgba(96,165,250,.13),transparent 28%),var(--bg); color:var(--text); }
+    .container { width:min(1450px,calc(100% - 32px)); margin:0 auto; padding:32px 0 48px; }
+    header { display:flex; justify-content:space-between; align-items:flex-end; gap:20px; margin-bottom:24px; }
+    .eyebrow { color:var(--accent); font-size:12px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; }
+    h1 { margin:8px 0 0; font-size:clamp(30px,4vw,46px); line-height:1.05; }
+    .subtitle { max-width:800px; margin:10px 0 0; color:var(--muted); font-size:14px; line-height:1.6; }
+    .btn-link, button { border:0; border-radius:10px; padding:10px 14px; color:#08111f; background:var(--accent); font:inherit; font-size:13px; font-weight:800; text-decoration:none; cursor:pointer; }
+    .panel { padding:22px; background:rgba(17,24,44,.84); border:1px solid var(--border); border-radius:18px; box-shadow:var(--shadow); }
+    .panel-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; }
+    .panel-title h2 { margin:0; font-size:18px; }
+    .panel-title span { color:var(--muted); font-size:11px; }
+    .pir-config { margin-bottom:24px; }
+    .config-grid { display:grid; grid-template-columns:1fr auto; gap:14px; align-items:end; }
+    label { display:grid; gap:6px; color:var(--muted); font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+    input { width:100%; padding:10px; color:var(--text); background:var(--panel-2); border:1px solid var(--border); border-radius:9px; font:inherit; }
+    input:focus { outline:none; border-color:var(--accent); }
+    .note { margin:12px 0 0; color:var(--muted); font-size:12px; }
+    .section-grid { display:grid; grid-template-columns:1.3fr 1fr; gap:20px; }
+    .table-container { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; text-align:left; font-size:13px; }
+    th,td { padding:12px 14px; border-bottom:1px solid var(--border); white-space:nowrap; }
+    th { color:var(--muted); font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:.05em; background:rgba(255,255,255,.02); }
+    th:last-child,td:last-child { text-align:center; }
+    tfoot td { font-weight:800; color:var(--accent); border-bottom:none; background:rgba(96,165,250,.05); }
+    .asset-name { font-weight:700; color:#e2e8f0; }
+    .table-input { width:85px; padding:6px 8px; color:#fff; background:var(--panel-2); border:1px solid var(--border); border-radius:8px; font-size:13px; font-weight:700; text-align:right; }
+    .chart-container { position:relative; height:380px; display:flex; align-items:center; justify-content:center; }
+    .summary { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:18px; }
+    .summary-card { padding:14px; background:rgba(255,255,255,.03); border:1px solid var(--border); border-radius:12px; }
+    .summary-card span { display:block; color:var(--muted); font-size:10px; font-weight:800; text-transform:uppercase; }
+    .summary-card strong { display:block; margin-top:6px; color:var(--green); font-size:18px; }
+    @media(max-width:1024px){ .section-grid{grid-template-columns:1fr;} header{flex-direction:column;align-items:flex-start;} }
+    @media(max-width:640px){ .config-grid,.summary{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div>
+        <div class="eyebrow">Wealth Strategy · Regime fiscale</div>
+        <h1>Portafoglio PIR</h1>
+        <p class="subtitle">Configura la quota PIR e gli ETF del portafoglio. I nomi iniziali sono segnaposto da sostituire quando sceglierai gli strumenti.</p>
+      </div>
+      <a class="btn-link" href="simulatorePatrimonio.html">Torna al simulatore</a>
+    </header>
+
+    <section class="panel pir-config">
+      <div class="panel-title"><h2>Impostazioni PIR</h2><span>Parametri condivisi col simulatore</span></div>
+      <div class="config-grid">
+        <label>Capitale totale PIR (€)<input id="pirCapital" type="number" min="0" step="100" /></label>
+        <button id="savePir" type="button">Salva capitale</button>
+      </div>
+      <p class="note">Il capitale PIR viene letto automaticamente dal simulatore principale.</p>
+    </section>
+
+    <div class="section-grid">
+      <section class="panel">
+        <div class="panel-title"><h2>Composizione Portafoglio PIR</h2><span>ETF da definire</span></div>
+        <div class="table-container">
+          <table>
+            <thead><tr><th>Strumento / ETF</th><th>Percentuale</th><th>Valore (€)</th><th>Rend. Annuo</th><th>Stima Teorica 12 Mesi</th></tr></thead>
+            <tbody id="pirTableBody"></tbody>
+            <tfoot><tr><td>TOTALE</td><td id="pirTotalPercent">100,00%</td><td id="pirTotalValue">€0</td><td id="pirAverageReturn">—</td><td id="pirTotalEstimate">—</td></tr></tfoot>
+          </table>
+        </div>
+        <div class="summary">
+          <div class="summary-card"><span>Capitale PIR</span><strong id="pirShareDisplay">€0</strong></div>
+          <div class="summary-card"><span>Valore teorico</span><strong id="pirValueDisplay">€0</strong></div>
+          <div class="summary-card"><span>Stima 12 mesi</span><strong id="pirEstimateDisplay">€0</strong></div>
+        </div>
+      </section>
+      <section class="panel">
+        <div class="panel-title"><h2>Ripartizione PIR</h2><span>Distribuzione %</span></div>
+        <div class="chart-container"><canvas id="pirChart"></canvas></div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const EUR = new Intl.NumberFormat("it-IT", { style:"currency", currency:"EUR", maximumFractionDigits:0 });
+    const pirCapitalInput = document.getElementById("pirCapital");
+    const pirData = [
+      { name:"XXXXXXX", percent:25, returnRate:0, color:"#3b82f6" },
+      { name:"XXXXXXX", percent:25, returnRate:0, color:"#ef4444" },
+      { name:"XXXXXXX", percent:25, returnRate:0, color:"#f59e0b" },
+      { name:"XXXXXXX", percent:25, returnRate:0, color:"#22c55e" }
+    ];
+    let chart;
+
+    pirCapitalInput.value = Number(localStorage.getItem("sim_pirFund") || 0);
+
+    function getInvestedValue() {
+      const lump = Number(localStorage.getItem("sim_lumpSum") || 0);
+      const monthly = Number(localStorage.getItem("sim_pacMonthly") || 0);
+      return lump + monthly;
+    }
+
+    function renderTable() {
+      const body = document.getElementById("pirTableBody");
+      const invested = Number(pirCapitalInput.value) || 0;
+      let totalPercent = 0;
+      let totalValue = 0;
+      let weightedReturn = 0;
+      let totalEstimate = 0;
+      body.innerHTML = "";
+
+      pirData.forEach((item, index) => {
+        totalPercent += item.percent;
+        const value = invested * item.percent / 100;
+        const estimate = value * Math.pow(1 + (item.returnRate / 100) / 12, 12);
+        totalValue += value;
+        totalEstimate += estimate;
+        weightedReturn += item.percent / 100 * item.returnRate;
+        const row = document.createElement("tr");
+        row.innerHTML = `<td class="asset-name"><input class="table-input" data-index="${index}" data-field="name" value="${item.name}"></td><td><input class="table-input" data-index="${index}" data-field="percent" type="number" min="0" max="100" step="0.5" value="${item.percent}"> %</td><td>${EUR.format(value)}</td><td><input class="table-input" data-index="${index}" data-field="returnRate" type="number" min="0" step="0.1" value="${item.returnRate}"> %</td><td>${EUR.format(estimate)}</td>`;
+        body.appendChild(row);
+      });
+      document.getElementById("pirTotalPercent").textContent = totalPercent.toFixed(2).replace(".", ",") + "%";
+      document.getElementById("pirTotalValue").textContent = EUR.format(totalValue);
+      document.getElementById("pirAverageReturn").textContent = weightedReturn.toFixed(2).replace(".", ",") + "%";
+      document.getElementById("pirTotalEstimate").textContent = EUR.format(totalEstimate);
+      document.getElementById("pirShareDisplay").textContent = EUR.format(invested);
+      document.getElementById("pirValueDisplay").textContent = EUR.format(totalValue);
+      document.getElementById("pirEstimateDisplay").textContent = EUR.format(totalEstimate);
+      body.querySelectorAll(".table-input").forEach(input => input.addEventListener("input", event => {
+        const item = pirData[Number(event.target.dataset.index)];
+        item[event.target.dataset.field] = event.target.dataset.field === "name" ? event.target.value : Number(event.target.value) || 0;
+        localStorage.setItem("sim_pirData", JSON.stringify(pirData));
+        renderTable();
+        updateChart();
+      }));
+    }
+
+    function updateChart() {
+      if (!chart) return;
+      chart.data.labels = pirData.map(item => item.name);
+      chart.data.datasets[0].data = pirData.map(item => item.percent);
+      chart.update();
+    }
+
+    function initChart() {
+      chart = new Chart(document.getElementById("pirChart"), { type:"doughnut", data:{ labels:pirData.map(item => item.name), datasets:[{ data:pirData.map(item => item.percent), backgroundColor:pirData.map(item => item.color), borderWidth:2, borderColor:"#11182c" }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:"bottom", labels:{ color:"#cbd5e1", usePointStyle:true, padding:14, font:{size:11} } } }, cutout:"65%" } });
+    }
+
+    document.getElementById("savePir").addEventListener("click", () => {
+      localStorage.setItem("sim_pirFund", String(Math.max(0, Number(pirCapitalInput.value) || 0)));
+      pirCapitalInput.value = Number(localStorage.getItem("sim_pirFund"));
+      renderTable();
+    });
+
+    const savedPirData = localStorage.getItem("sim_pirData");
+    if (savedPirData) {
+      try { pirData.splice(0, pirData.length, ...JSON.parse(savedPirData)); } catch { /* Usa i segnaposto iniziali. */ }
+    }
+    renderTable();
+    initChart();
+  </script>
+</body>
+</html>

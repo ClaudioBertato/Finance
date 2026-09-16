@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Esplora PAC · Complessità Portafoglio</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #11182c;
+      --panel-2: #16203a;
+      --border: rgba(255,255,255,.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --orange: #f59e0b;
+      --pink: #ec4899;
+      --cyan: #38bdf8;
+      --purple: #a855f7;
+      --green: #22c55e;
+      --red: #ef4444;
+      --shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 35px 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(96,165,250,.13), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(34,197,94,.10), transparent 24%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1450px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    }
+
+    .subtitle {
+      max-width: 850px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .btn-link {
+      background: var(--accent);
+      border: 1px solid var(--border);
+      color: #08111f;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      text-decoration: none;
+      transition: filter .2s, transform .2s;
+    }
+
+    .btn-link:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .panel {
+      background: rgba(17,24,44,.84);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+      padding: 24px;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .panel-title h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: -.01em;
+    }
+
+    .panel-title span {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.025);
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13px;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 11px;
+      letter-spacing: .05em;
+      background: rgba(255,255,255,.02);
+    }
+
+    th:last-child,
+    td:last-child {
+      text-align: center;
+    }
+
+    tbody tr:hover {
+      background: rgba(255,255,255,.015);
+    }
+
+    .asset-name {
+      font-weight: 700;
+      color: #e2e8f0;
+    }
+
+    .table-input {
+      width: 75px;
+      background: #16203a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      padding: 6px 8px;
+      font-size: 13px;
+      font-weight: 700;
+      text-align: right;
+    }
+
+    .table-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    tfoot td {
+      font-weight: 800;
+      color: var(--accent);
+      border-bottom: none;
+      background: rgba(96,165,250,.05);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .deposit-info-box {
+      margin-top: 20px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+
+    .mini-card {
+      background: rgba(255,255,255,.03);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px;
+    }
+
+    .mini-card .label {
+      font-size: 10px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .mini-card .value {
+      font-size: 15px;
+      font-weight: 850;
+      margin-top: 6px;
+      color: var(--text);
+    }
+
+    .pac-plan {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .pac-plan-title {
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+
+    .pac-plan-list {
+      display: grid;
+      gap: 6px;
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .pac-plan-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 7px 9px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .allocation-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .allocation-summary div {
+      padding: 9px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .allocation-summary strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .equity-config {
+      margin-bottom: 24px;
+    }
+
+    .equity-config-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .equity-config label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .equity-config input {
+      width: 100%;
+      padding: 10px;
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      font: inherit;
+    }
+
+    .equity-config input:focus { outline: none; border-color: var(--accent); }
+
+    .equity-config-note {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .equity-config .pac-schedule-list { margin-top: 12px; }
+
+    .equity-config .pac-change-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+    }
+
+    .equity-config .pac-change-row input {
+      width: 100%;
+      padding: 8px;
+      color: var(--text);
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+    }
+
+    .equity-config button {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--accent);
+      background: rgba(255,255,255,.05);
+      font: inherit;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .pac-records { margin-bottom: 24px; }
+    .pac-record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .pac-record-card { padding: 16px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; }
+    .pac-record-card h3 { margin: 0 0 12px; font-size: 15px; }
+    .pac-record-card form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
+    .pac-record-card label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    .pac-record-card input { width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit; }
+    .pac-record-table { margin-top: 16px; }
+
+    @media (max-width: 1024px) {
+      .section-grid { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: flex-start; gap: 16px; }
+      .deposit-info-box { grid-template-columns: 1fr; }
+      .equity-config-grid { grid-template-columns: 1fr; }
+      .pac-record-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <div>
+        <div class="eyebrow">Wealth Strategy · Dettaglio</div>
+        <h1>Esplora PAC & Asset Allocation</h1>
+        <p class="subtitle">
+          Monitoraggio in tempo reale dei versamenti basato sulla data corrente e distribuzione percentuale dei fondi.
+        </p>
+      </div>
+      <div>
+        <a href="simulatorePatrimonio.html" class="btn-link">← Torna al Simulatore</a>
+      </div>
+    </header>
+
+    <section class="panel pac-records">
+      <h2>Record PAC</h2>
+      <div class="pac-record-grid">
+        <div class="pac-record-card">
+          <h3>Aggiorna PAC mensile</h3>
+          <form id="monthlyPacForm">
+            <label>Data inizio<input id="monthlyPacDate" type="date" required /></label>
+            <label>Importo mensile (€)<input id="monthlyPacAmount" type="number" min="0" step="50" required /></label>
+            <button type="submit">Salva</button>
+          </form>
+        </div>
+        <div class="pac-record-card">
+          <h3>Aggiungi una tantum</h3>
+          <form id="lumpPacForm">
+            <label>Data versamento<input id="lumpPacDate" type="date" required /></label>
+            <label>Importo (€)<input id="lumpPacAmount" type="number" min="0" step="100" required /></label>
+            <button type="submit">Aggiungi</button>
+          </form>
+        </div>
+      </div>
+      <div class="table-container pac-record-table">
+        <table>
+          <thead><tr><th>Tipo</th><th>Data</th><th>Importo</th><th></th></tr></thead>
+          <tbody id="pacRecordsBody"></tbody>
+        </table>
+        <div class="empty" id="pacEmptyState">Nessun record PAC registrato.</div>
+      </div>
+    </section>
+
+    <div class="section-grid">
+      <!-- Pannello Tabella Composizione -->
+      <div class="panel">
+        <div class="panel-title">
+          <h2>Portafoglio Core</h2>
+          <span>75% del PAC · 4 ETF</span>
+        </div>
+
+        <div class="table-container">
+          <table id="portfolioTable">
+            <thead>
+              <tr>
+                <th>Strumento / ETF</th>
+                <th>Percentuale</th>
+                <th>Valore (€)</th>
+                <th>Rend. Annuo</th>
+                <th>Stima Teorica 12 Mesi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Generato via JavaScript -->
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>TOTALE</td>
+                <td id="totalPercent">100,00%</td>
+                <td id="totalNumeric">€0</td>
+                <td id="avgReturn">—</td>
+                <td id="totalNet">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+
+        <div class="deposit-info-box">
+          <div class="mini-card">
+            <div class="label">Data Inizio PAC</div>
+            <div class="value">25/09/2026</div>
+          </div>
+          <div class="mini-card">
+            <div class="label">Versamenti Effettuati</div>
+            <div class="value" id="paymentsCountDisplay">0 versamenti</div>
+          </div>
+          <div class="mini-card">
+            <div class="label">Deposito Totale Oggi</div>
+            <div class="value" id="totalDepositDisplay">€0</div>
+          </div>
+          <div class="mini-card">
+            <div class="label">Una Tantum</div>
+            <div class="value" id="lumpSumDisplay">€0</div>
+          </div>
+          <div class="mini-card">
+            <div class="label">PAC Mensile</div>
+            <div class="value" id="pacMonthlyDisplay">€0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pannello Grafico a Torta -->
+      <div class="panel">
+        <div class="panel-title">
+          <h2>Ripartizione Pesi</h2>
+          <span>Distribuzione %</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="allocationChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-grid">
+      <div class="panel">
+        <div class="panel-title">
+          <h2>Portafoglio Satellite</h2>
+          <span>25% del PAC · 3 ETF</span>
+        </div>
+
+        <div class="table-container">
+          <table id="satelliteTable">
+            <thead>
+              <tr>
+                <th>Strumento / ETF</th>
+                <th>Percentuale</th>
+                <th>Valore (€)</th>
+                <th>Rend. Annuo</th>
+                <th>Stima Teorica 12 Mesi</th>
+              </tr>
+            </thead>
+            <tbody id="satelliteTableBody"></tbody>
+            <tfoot>
+              <tr>
+                <td>TOTALE</td>
+                <td id="satelliteTotalPercent">100,00%</td>
+                <td id="satelliteTotalNumeric">€0</td>
+                <td id="satelliteAvgReturn">—</td>
+                <td id="satelliteTotalNet">—</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">
+          <h2>Ripartizione Satellite</h2>
+          <span>Distribuzione %</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="satelliteAllocationChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const EUR = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+    const CORE_SHARE = 0.75;
+    const SATELLITE_SHARE = 0.25;
+
+    // Recupera i valori salvati o impostati nel simulatore principale (tramite localStorage o default)
+    let pacRecords = readPacRecords();
+    let savedLumpSum = 0;
+    let savedPacMonthly = 0;
+    let pacChanges = [];
+    let startDateStr = new Date().toISOString().slice(0, 10);
+
+    function readPacRecords() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("sim_pacRecords") || "[]");
+        const cleaned = Array.isArray(saved) ? saved.filter(record => record.source !== "transfer") : [];
+        localStorage.setItem("sim_pacRecords", JSON.stringify(cleaned));
+        return cleaned;
+      } catch {
+        return [];
+      }
+    }
+
+    function syncPacValuesFromRecords() {
+      const monthlyRecords = pacRecords
+        .filter(record => record.type === "monthly" && Number(record.amount) >= 0 && record.date)
+        .sort((first, second) => first.date.localeCompare(second.date));
+      const lumpRecords = pacRecords.filter(record => record.type === "lump" && Number(record.amount) >= 0);
+      const dates = pacRecords.map(record => record.date).filter(Boolean).sort();
+
+      savedPacMonthly = monthlyRecords.length > 0 ? Number(monthlyRecords[0].amount) : 0;
+      savedLumpSum = lumpRecords.reduce((total, record) => total + Number(record.amount), 0);
+      pacChanges = monthlyRecords.slice(1).map(record => ({
+        year: new Date(`${record.date}T00:00:00`).getFullYear(),
+        amount: Number(record.amount)
+      }));
+      startDateStr = dates[0] || new Date().toISOString().slice(0, 10);
+    }
+
+    syncPacValuesFromRecords();
+
+    const monthlyPacForm = document.getElementById("monthlyPacForm");
+    const lumpPacForm = document.getElementById("lumpPacForm");
+    const pacRecordsBody = document.getElementById("pacRecordsBody");
+    const pacEmptyState = document.getElementById("pacEmptyState");
+
+    function savePacRecords() {
+      localStorage.setItem("sim_pacRecords", JSON.stringify(pacRecords));
+    }
+
+    function refreshSharedPacData() {
+      pacRecords = readPacRecords();
+      syncPacValuesFromRecords();
+      ({ paymentsCount, totalDeposited } = calculatePaymentsAndDeposits());
+      document.getElementById("paymentsCountDisplay").textContent = paymentsCount + " mesi (" + paymentsCount + " vers.)";
+      document.getElementById("totalDepositDisplay").textContent = EUR.format(totalDeposited);
+      document.getElementById("lumpSumDisplay").textContent = EUR.format(savedLumpSum);
+      document.getElementById("pacMonthlyDisplay").textContent = EUR.format(savedPacMonthly) + "/mese";
+      renderPacRecords();
+      renderTable();
+      renderSatelliteTable();
+    }
+
+    function refreshPacCalculations() {
+      syncPacValuesFromRecords();
+      ({ paymentsCount, totalDeposited } = calculatePaymentsAndDeposits());
+      document.getElementById("paymentsCountDisplay").textContent = paymentsCount + " mesi (" + paymentsCount + " vers.)";
+      document.getElementById("totalDepositDisplay").textContent = EUR.format(totalDeposited);
+      document.getElementById("lumpSumDisplay").textContent = EUR.format(savedLumpSum);
+      document.getElementById("pacMonthlyDisplay").textContent = EUR.format(savedPacMonthly) + "/mese";
+      renderTable();
+      renderSatelliteTable();
+    }
+
+    function formatRecordDate(date) {
+      return new Intl.DateTimeFormat("it-IT").format(new Date(`${date}T00:00:00`));
+    }
+
+    function renderPacRecords() {
+      pacRecordsBody.innerHTML = "";
+      pacEmptyState.hidden = pacRecords.length > 0;
+
+      pacRecords.forEach((record, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${record.type === "monthly" ? "PAC mensile" : "Una tantum"}</td>
+          <td>${formatRecordDate(record.date)}</td>
+          <td>${EUR.format(record.amount)}${record.type === "monthly" ? "/mese" : ""}</td>
+          <td><button class="remove" type="button" data-pac-index="${index}">Elimina</button></td>
+        `;
+        pacRecordsBody.appendChild(row);
+      });
+
+      pacRecordsBody.querySelectorAll("[data-pac-index]").forEach(button => {
+        button.addEventListener("click", () => {
+          pacRecords.splice(Number(button.dataset.pacIndex), 1);
+          savePacRecords();
+          renderPacRecords();
+          refreshPacCalculations();
+        });
+      });
+    }
+
+    monthlyPacForm.addEventListener("submit", event => {
+      event.preventDefault();
+      pacRecords.push({
+        type: "monthly",
+        date: document.getElementById("monthlyPacDate").value,
+        amount: Number(document.getElementById("monthlyPacAmount").value)
+      });
+      pacRecords.sort((first, second) => first.date.localeCompare(second.date));
+      savePacRecords();
+      renderPacRecords();
+      refreshPacCalculations();
+      monthlyPacForm.reset();
+    });
+
+    lumpPacForm.addEventListener("submit", event => {
+      event.preventDefault();
+      pacRecords.push({
+        type: "lump",
+        date: document.getElementById("lumpPacDate").value,
+        amount: Number(document.getElementById("lumpPacAmount").value)
+      });
+      pacRecords.sort((first, second) => first.date.localeCompare(second.date));
+      savePacRecords();
+      renderPacRecords();
+      refreshPacCalculations();
+      lumpPacForm.reset();
+    });
+
+    function getPacAmountForYear(year) {
+      return pacChanges
+        .filter(change => year >= Number(change.year))
+        .reduce((amount, change) => Number(change.amount), savedPacMonthly);
+    }
+
+    // Calcolo dinamico dei versamenti in base alla data corrente del sistema (es. Settembre 2026)
+    function calculatePaymentsAndDeposits() {
+      const startDate = new Date(startDateStr);
+      const currentDate = new Date(); // Data odierna del sistema
+
+      let monthsElapsed = (currentDate.getFullYear() - startDate.getFullYear()) * 12 + (currentDate.getMonth() - startDate.getMonth());
+      if (currentDate.getDate() >= startDate.getDate() && monthsElapsed < 0) {
+        monthsElapsed = 0;
+      }
+      const paymentsCount = Math.max(0, monthsElapsed);
+
+      // Deposito totale = Capitale Iniziale (Una tantum) + (PAC Mensile * numero di mesi trascorsi)
+      let scheduledDeposits = 0;
+      for (let paymentIndex = 0; paymentIndex < paymentsCount; paymentIndex += 1) {
+        const paymentDate = new Date(startDate);
+        paymentDate.setMonth(paymentDate.getMonth() + paymentIndex + 1);
+        scheduledDeposits += getPacAmountForYear(paymentDate.getFullYear());
+      }
+      const totalDeposited = savedLumpSum + scheduledDeposits;
+
+      return {
+        paymentsCount,
+        totalDeposited
+      };
+    }
+
+    let { paymentsCount, totalDeposited } = calculatePaymentsAndDeposits();
+
+    document.getElementById("paymentsCountDisplay").textContent = paymentsCount + " mesi (" + paymentsCount + " vers.)";
+    document.getElementById("totalDepositDisplay").textContent = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(totalDeposited);
+    document.getElementById("lumpSumDisplay").textContent = EUR.format(savedLumpSum);
+    document.getElementById("pacMonthlyDisplay").textContent = EUR.format(savedPacMonthly) + "/mese";
+
+    const portfolioData = [
+      { name: "iShares Core MSCI World", percent: 35.0, returnRate: 7.5, color: "#3b82f6" },
+      { name: "Amundi MSCI EM Asia", percent: 25.0, returnRate: 6.8, color: "#ef4444" },
+      { name: "iShares Core S&P 500", percent: 30.0, returnRate: 8.0, color: "#f59e0b" },
+      { name: "iShares Physical Gold", percent: 10.0, returnRate: 4.5, color: "#22c55e" }
+    ];
+
+    const satelliteData = [
+      { name: "iShares NASDAQ-100", percent: 45.0, returnRate: 10.0, color: "#38bdf8" },
+      { name: "Xtrackers CSI 300 Tech", percent: 30.0, returnRate: 8.0, color: "#a855f7" },
+      { name: "iShares Global Clean Energy", percent: 25.0, returnRate: 6.0, color: "#22c55e" }
+    ];
+
+    const tableBody = document.getElementById("tableBody");
+    const totalPercentEl = document.getElementById("totalPercent");
+    const totalNumericEl = document.getElementById("totalNumeric");
+    const avgReturnEl = document.getElementById("avgReturn");
+    const totalNetEl = document.getElementById("totalNet");
+    const satelliteTableBody = document.getElementById("satelliteTableBody");
+    const satelliteTotalPercentEl = document.getElementById("satelliteTotalPercent");
+    const satelliteTotalNumericEl = document.getElementById("satelliteTotalNumeric");
+    const satelliteAvgReturnEl = document.getElementById("satelliteAvgReturn");
+    const satelliteTotalNetEl = document.getElementById("satelliteTotalNet");
+
+    let chart;
+    let satelliteChart;
+
+    function renderTable() {
+      tableBody.innerHTML = "";
+      let sumPercent = 0;
+      let sumValue = 0;
+      let weightedReturn = 0;
+      let sumNet = 0;
+      const coreDeposit = totalDeposited * CORE_SHARE;
+
+      portfolioData.forEach((item, index) => {
+        sumPercent += item.percent;
+        const assetValue = (coreDeposit * item.percent) / 100;
+        sumValue += assetValue;
+        weightedReturn += (item.percent / 100) * item.returnRate;
+
+        const monthlyReturnRate = (item.returnRate / 100) / 12;
+        const netEstimated = assetValue * Math.pow(1 + monthlyReturnRate, 12);
+        sumNet += netEstimated;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="asset-name">${item.name}</td>
+          <td>
+            <input type="number" class="table-input" value="${item.percent.toFixed(2)}" step="0.5" min="0" max="100" data-index="${index}" data-field="percent"> %
+          </td>
+          <td>${EUR.format(assetValue)}</td>
+          <td>
+            <input type="number" class="table-input" value="${item.returnRate.toFixed(1)}" step="0.1" data-index="${index}" data-field="returnRate"> %
+          </td>
+          <td>${EUR.format(netEstimated)}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+
+      totalPercentEl.textContent = sumPercent.toFixed(2).replace('.', ',') + "%";
+      totalNumericEl.textContent = EUR.format(sumValue);
+      avgReturnEl.textContent = weightedReturn.toFixed(2).replace('.', ',') + "%";
+      totalNetEl.textContent = EUR.format(sumNet);
+
+      tableBody.querySelectorAll(".table-input").forEach(input => {
+        input.addEventListener("input", (e) => {
+          const idx = Number(e.target.dataset.index);
+          const field = e.target.dataset.field;
+          const val = parseFloat(e.target.value) || 0;
+          portfolioData[idx][field] = val;
+          renderTable();
+          updateChart();
+        });
+      });
+    }
+
+    function renderSatelliteTable() {
+      satelliteTableBody.innerHTML = "";
+      let sumPercent = 0;
+      let sumValue = 0;
+      let weightedReturn = 0;
+      let sumNet = 0;
+      const satelliteDeposit = totalDeposited * SATELLITE_SHARE;
+
+      satelliteData.forEach((item, index) => {
+        sumPercent += item.percent;
+        const assetValue = (satelliteDeposit * item.percent) / 100;
+        const monthlyReturnRate = (item.returnRate / 100) / 12;
+        const netEstimated = assetValue * Math.pow(1 + monthlyReturnRate, 12);
+        sumValue += assetValue;
+        weightedReturn += (item.percent / 100) * item.returnRate;
+        sumNet += netEstimated;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="asset-name">${item.name}</td>
+          <td><input type="number" class="table-input" value="${item.percent.toFixed(2)}" step="0.5" min="0" max="100" data-index="${index}" data-field="percent"> %</td>
+          <td>${EUR.format(assetValue)}</td>
+          <td><input type="number" class="table-input" value="${item.returnRate.toFixed(1)}" step="0.1" min="0" data-index="${index}" data-field="returnRate"> %</td>
+          <td>${EUR.format(netEstimated)}</td>
+        `;
+        satelliteTableBody.appendChild(tr);
+      });
+
+      satelliteTotalPercentEl.textContent = sumPercent.toFixed(2).replace('.', ',') + "%";
+      satelliteTotalNumericEl.textContent = EUR.format(sumValue);
+      satelliteAvgReturnEl.textContent = weightedReturn.toFixed(2).replace('.', ',') + "%";
+      satelliteTotalNetEl.textContent = EUR.format(sumNet);
+
+      satelliteTableBody.querySelectorAll(".table-input").forEach(input => {
+        input.addEventListener("input", (event) => {
+          const index = Number(event.target.dataset.index);
+          const field = event.target.dataset.field;
+          satelliteData[index][field] = parseFloat(event.target.value) || 0;
+          renderSatelliteTable();
+          updateSatelliteChart();
+        });
+      });
+    }
+
+    function initChart() {
+      const ctx = document.getElementById("allocationChart").getContext("2d");
+      chart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: portfolioData.map(i => i.name),
+          datasets: [{
+            data: portfolioData.map(i => i.percent),
+            backgroundColor: portfolioData.map(i => i.color),
+            borderWidth: 2,
+            borderColor: "#11182c"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                color: "#cbd5e1",
+                usePointStyle: true,
+                padding: 14,
+                font: { size: 11 }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return ` ${context.label}: ${context.raw}%`;
+                }
+              }
+            }
+          },
+          cutout: "65%"
+        }
+      });
+    }
+
+    function updateChart() {
+      if (chart) {
+        chart.data.labels = portfolioData.map(i => i.name);
+        chart.data.datasets[0].data = portfolioData.map(i => i.percent);
+        chart.update();
+      }
+    }
+
+    function initSatelliteChart() {
+      const ctx = document.getElementById("satelliteAllocationChart").getContext("2d");
+      satelliteChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: satelliteData.map(item => item.name),
+          datasets: [{
+            data: satelliteData.map(item => item.percent),
+            backgroundColor: satelliteData.map(item => item.color),
+            borderWidth: 2,
+            borderColor: "#11182c"
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: { color: "#cbd5e1", usePointStyle: true, padding: 14, font: { size: 11 } }
+            }
+          },
+          cutout: "65%"
+        }
+      });
+    }
+
+    function updateSatelliteChart() {
+      if (satelliteChart) {
+        satelliteChart.data.datasets[0].data = satelliteData.map(item => item.percent);
+        satelliteChart.update();
+      }
+    }
+
+    renderTable();
+    initChart();
+    renderSatelliteTable();
+    initSatelliteChart();
+    renderPacRecords();
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro BTP</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #11182c;
+      --panel-2: #16203a;
+      --border: rgba(255,255,255,.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --red: #ef4444;
+      --shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 15% 10%, rgba(96,165,250,.13), transparent 28%), var(--bg);
+      color: var(--text);
+    }
+
+    .container { width: min(1100px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 48px; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 24px; }
+    .eyebrow { color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 8px 0 0; font-size: clamp(30px, 4vw, 46px); line-height: 1.05; }
+    .subtitle { max-width: 720px; margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    .back-link, button { border: 0; border-radius: 10px; padding: 10px 14px; color: #08111f; background: var(--accent); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; cursor: pointer; }
+    .panel { padding: 22px; background: rgba(17,24,44,.84); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); }
+    .panel h2 { margin: 0 0 16px; font-size: 18px; }
+    form { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr auto; gap: 12px; align-items: end; }
+    label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    input { width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit; }
+    input:focus { outline: none; border-color: var(--accent); }
+    .table-wrap { margin-top: 22px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+    .remove { padding: 7px 10px; color: var(--text); background: rgba(239,68,68,.16); border: 1px solid rgba(239,68,68,.35); }
+    .empty { padding: 22px 12px; color: var(--muted); text-align: center; }
+    .status { min-height: 20px; margin-top: 12px; color: var(--muted); font-size: 12px; }
+    .coupon-summary { margin-top: 22px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .summary-card { padding: 14px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; }
+    .summary-card span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    .summary-card strong { display: block; margin-top: 6px; color: var(--text); font-size: 20px; }
+    .coupon-table { margin-top: 16px; }
+    @media (max-width: 800px) {
+      header { flex-direction: column; align-items: flex-start; }
+      form { grid-template-columns: 1fr 1fr; }
+      form button { width: 100%; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div>
+        <div class="eyebrow">Wealth Strategy · Registro</div>
+        <h1>Acquisti BTP</h1>
+        <p class="subtitle">Registra ogni acquisto. I dati vengono salvati nel browser e usati automaticamente dal simulatore patrimoniale.</p>
+      </div>
+      <a class="back-link" href="simulatorePatrimonio.html">Torna al simulatore</a>
+    </header>
+
+    <section class="panel">
+      <h2>Nuovo acquisto BTP</h2>
+      <form id="btpForm">
+        <label>Data acquisto<input id="purchaseDate" type="date" required /></label>
+        <label>Importo (€)<input id="amount" type="number" min="0" step="100" required /></label>
+        <label>Durata (anni)<input id="duration" type="number" min="1" max="100" step="1" required /></label>
+        <label>Tasso annuo (%)<input id="rate" type="number" min="0" max="100" step="0.01" required /></label>
+        <label>Frequenza cedole (mesi)<input id="couponFrequency" type="number" min="1" max="12" step="1" value="6" required /></label>
+        <button type="submit">Aggiungi</button>
+      </form>
+      <div class="status" id="status" aria-live="polite"></div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Data acquisto</th>
+              <th>Importo</th>
+              <th>Durata</th>
+              <th>Scadenza</th>
+              <th>Tasso annuo</th>
+              <th>Cedole ogni</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="recordsBody"></tbody>
+        </table>
+        <div class="empty" id="emptyState">Nessun acquisto registrato.</div>
+      </div>
+
+      <section class="coupon-summary">
+        <h2>Riepilogo cedole fino a oggi</h2>
+        <div class="summary-grid">
+          <div class="summary-card"><span>Periodi incassati</span><strong id="totalCouponPeriods">0</strong></div>
+          <div class="summary-card"><span>Cedole incassate</span><strong id="totalCoupons">€0</strong></div>
+          <div class="summary-card"><span>Valore ancora nei BTP</span><strong id="remainingBtpValue">€0</strong></div>
+          <div class="summary-card"><span>Cedole + valore BTP</span><strong id="totalBtpPosition">€0</strong></div>
+        </div>
+        <div class="table-wrap coupon-table">
+          <table>
+            <thead>
+              <tr><th>Acquisto</th><th>Periodi</th><th>Cedola per periodo</th><th>Cedole incassate</th><th>Valore BTP</th><th>Totale</th></tr>
+            </thead>
+            <tbody id="couponSummaryBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+
+  </main>
+
+  <script>
+    const STORAGE_KEY = "sim_btpRecords";
+    localStorage.removeItem("sim_transfers");
+    const EUR = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+    const form = document.getElementById("btpForm");
+    const recordsBody = document.getElementById("recordsBody");
+    const emptyState = document.getElementById("emptyState");
+    const status = document.getElementById("status");
+    const purchaseDate = document.getElementById("purchaseDate");
+    const couponSummaryBody = document.getElementById("couponSummaryBody");
+    const totalCouponPeriods = document.getElementById("totalCouponPeriods");
+    const totalCoupons = document.getElementById("totalCoupons");
+    const remainingBtpValue = document.getElementById("remainingBtpValue");
+    const totalBtpPosition = document.getElementById("totalBtpPosition");
+
+    let records = readRecords();
+    purchaseDate.value = new Date().toISOString().slice(0, 10);
+
+    function readRecords() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(saved) ? saved.map(record => ({
+          ...record,
+          frequency: Number(record.frequency) > 0 ? Number(record.frequency) : 6
+        })) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveRecords() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    }
+
+
+    function getMaturityDate(date, duration) {
+      const maturity = new Date(`${date}T00:00:00`);
+      maturity.setFullYear(maturity.getFullYear() + Number(duration));
+      return maturity.toISOString().slice(0, 10);
+    }
+
+    function formatDate(date) {
+      return new Intl.DateTimeFormat("it-IT").format(new Date(`${date}T00:00:00`));
+    }
+
+    function getElapsedCouponPeriods(record) {
+      const purchase = new Date(`${record.date}T00:00:00`);
+      const today = new Date();
+      const maturity = new Date(`${getMaturityDate(record.date, record.duration)}T00:00:00`);
+      const endDate = today < maturity ? today : maturity;
+      const monthsElapsed = Math.max(0,
+        (endDate.getFullYear() - purchase.getFullYear()) * 12 +
+        (endDate.getMonth() - purchase.getMonth()) -
+        (endDate.getDate() < purchase.getDate() ? 1 : 0)
+      );
+      return Math.floor(monthsElapsed / Number(record.frequency));
+    }
+
+    function getCouponSummary(record) {
+      const periods = getElapsedCouponPeriods(record);
+      const couponPerPeriod = Number(record.amount) * (Number(record.rate) / 100) * (Number(record.frequency) / 12);
+      const couponsReceived = periods * couponPerPeriod;
+      const maturity = new Date(`${getMaturityDate(record.date, record.duration)}T00:00:00`);
+      const remainingValue = new Date() < maturity ? Number(record.amount) : 0;
+
+      return {
+        periods,
+        couponPerPeriod,
+        couponsReceived,
+        remainingValue,
+        total: couponsReceived + remainingValue
+      };
+    }
+
+    function renderRecords() {
+      recordsBody.innerHTML = "";
+      emptyState.hidden = records.length > 0;
+
+      records.forEach((record, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${formatDate(record.date)}</td>
+          <td>${EUR.format(record.amount)}</td>
+          <td>${record.duration} anni</td>
+          <td>${formatDate(getMaturityDate(record.date, record.duration))}</td>
+          <td>${Number(record.rate).toFixed(2).replace(".", ",")}%</td>
+          <td>${record.frequency} mesi</td>
+          <td><button class="remove" type="button" data-index="${index}">Elimina</button></td>
+        `;
+        recordsBody.appendChild(row);
+      });
+
+      recordsBody.querySelectorAll(".remove").forEach(button => {
+        button.addEventListener("click", () => {
+          records.splice(Number(button.dataset.index), 1);
+          saveRecords();
+          renderRecords();
+          renderCouponSummary();
+          status.textContent = "Acquisto eliminato.";
+        });
+      });
+    }
+
+    function renderCouponSummary() {
+      couponSummaryBody.innerHTML = "";
+      let periodsTotal = 0;
+      let couponsTotal = 0;
+      let remainingTotal = 0;
+
+      records.forEach(record => {
+        const summary = getCouponSummary(record);
+        periodsTotal += summary.periods;
+        couponsTotal += summary.couponsReceived;
+        remainingTotal += summary.remainingValue;
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${formatDate(record.date)}</td>
+          <td>${summary.periods}</td>
+          <td>${EUR.format(summary.couponPerPeriod)}</td>
+          <td>${EUR.format(summary.couponsReceived)}</td>
+          <td>${EUR.format(summary.remainingValue)}</td>
+          <td>${EUR.format(summary.total)}</td>
+        `;
+        couponSummaryBody.appendChild(row);
+      });
+
+      totalCouponPeriods.textContent = periodsTotal;
+      totalCoupons.textContent = EUR.format(couponsTotal);
+      remainingBtpValue.textContent = EUR.format(remainingTotal);
+      totalBtpPosition.textContent = EUR.format(couponsTotal + remainingTotal);
+    }
+
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      records.push({
+        date: purchaseDate.value,
+        amount: Number(document.getElementById("amount").value),
+        duration: Number(document.getElementById("duration").value),
+        rate: Number(document.getElementById("rate").value),
+        frequency: Number(document.getElementById("couponFrequency").value)
+      });
+      records.sort((first, second) => first.date.localeCompare(second.date));
+      saveRecords();
+      renderRecords();
+      renderCouponSummary();
+      form.reset();
+      purchaseDate.value = new Date().toISOString().slice(0, 10);
+      status.textContent = "Acquisto salvato. Il simulatore lo usera al prossimo caricamento.";
+    });
+
+    renderRecords();
+    renderCouponSummary();
+  </script>
+</body>
+</html>

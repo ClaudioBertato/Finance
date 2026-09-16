@@ -1,0 +1,1704 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wealth Strategy Simulator</title>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #11182c;
+      --panel-2: #16203a;
+      --border: rgba(255,255,255,.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --orange: #f59e0b;
+      --pink: #ec4899;
+      --cyan: #38bdf8;
+      --purple: #a855f7;
+      --green: #22c55e;
+      --red: #ef4444;
+      --shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 35px 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, rgba(96,165,250,.13), transparent 28%),
+        radial-gradient(circle at 85% 15%, rgba(34,197,94,.10), transparent 24%),
+        var(--bg);
+      color: var(--text);
+    }
+
+    .container {
+      width: min(1450px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 32px 0 48px;
+    }
+
+    header {
+      margin-bottom: 24px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      margin: auto 0;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.05;
+      letter-spacing: -.03em;
+    }
+
+    .subtitle {
+      max-width: 850px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    .recap-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 32px 0 14px;
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    .recap-header:first-of-type {
+      margin-top: 26px;
+    }
+    .recap-badge {
+      font-size: 11px;
+      color: #f8fafc;
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.15);
+      font-weight: 700;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      min-height: 126px;
+      min-width: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.02));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: auto -15% -55% auto;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: var(--card-color);
+      filter: blur(44px);
+      opacity: .18;
+      pointer-events: none;
+    }
+
+    .card .label {
+      position: relative;
+      z-index: 1;
+      font-size: 9px;
+      color: var(--muted);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .card .value {
+      position: relative;
+      z-index: 1;
+      margin-top: 10px;
+      font-size: clamp(18px, 1.6vw, 26px);
+      font-weight: 850;
+      letter-spacing: -.03em;
+      color: var(--card-color);
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .control-panel, .chart-panel {
+      background: rgba(17,24,44,.84);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(14px);
+    }
+
+    .control-panel {
+      padding: 20px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 17px;
+      letter-spacing: -.01em;
+    }
+
+    .section-title span {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 5px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,.025);
+    }
+
+    .control {
+      margin-bottom: 18px;
+    }
+
+    .control:last-child {
+      margin-bottom: 0;
+    }
+
+    .control-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+
+    .control-label {
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .control-value {
+      font-size: 13px;
+      font-weight: 800;
+      color: #dbeafe;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      height: 6px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .range-scale {
+      display: flex;
+      justify-content: space-between;
+      color: #64748b;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    .tax-info {
+      margin-top: 18px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+
+    .tax-rate {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: rgba(96,165,250,.08);
+      border: 1px solid rgba(96,165,250,.17);
+      color: #dbeafe;
+      font-weight: 800;
+    }
+
+    .pac-schedule {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .pac-schedule-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .pac-schedule-title {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .pac-schedule-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .pac-change-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pac-change-row input {
+      width: 100%;
+      min-width: 0;
+      padding: 7px 8px;
+      color: var(--text);
+      background: #16203a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .pac-change-remove,
+    .pac-change-add {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 9px;
+      color: var(--text);
+      background: rgba(255,255,255,.05);
+      font: inherit;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .pac-change-add {
+      color: var(--accent);
+      margin-top: 8px;
+    }
+
+    .chart-panel {
+      margin-top: 18px;
+      padding: 20px;
+    }
+
+    .chart-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 4px 16px;
+    }
+
+    .chart-head h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .chart-head .hint {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    /* Layout con Slider Verticale + Grafico */
+    .chart-main-layout {
+      display: flex;
+      align-items: stretch;
+      gap: 20px;
+    }
+
+    .year-select-wrap {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 30px;
+      min-width: 120px;
+      padding: 18px 0;
+    }
+
+    .timeline-cap {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      line-height: 1.5;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .timeline-cap strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    .timeline-stat {
+      padding: 10px 0;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .timeline-stat strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 14px;
+      letter-spacing: 0;
+    }
+
+    .timeline-current {
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .timeline-current strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--red);
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .timeline-note {
+      padding: 10px;
+      border: 1px solid rgba(96, 165, 250, 0.18);
+      border-radius: 10px;
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.4;
+      text-align: center;
+    }
+
+    .year-select-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .year-select {
+      width: 100%;
+      padding: 10px 12px;
+      color: var(--text);
+      background: #16203a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    /* Layout con Slider Verticale + Grafico */
+    .chart-main-layout {
+      display: flex;
+      align-items: stretch;
+      gap: 20px;
+    }
+
+    .slider-vertical-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: auto;
+      align-self: stretch;
+      padding: 16px 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      min-width: 72px;
+    }
+
+    .slider-year-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .slider-max-year {
+      position: relative;
+      top: 0;
+    }
+
+    .slider-track-wrap {
+      flex: 1 1 auto;
+      height: auto;
+      min-height: 0;
+      width: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      align-self: center;
+      position: relative;
+      margin: 0;
+      touch-action: none;
+    }
+
+    .slider-track-wrap::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 4px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: #334155;
+    }
+
+    /* Slider verticale con una traccia che occupa tutta la distanza disponibile. */
+    .vertical-range {
+      -webkit-appearance: none;
+      appearance: none;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .slider-thumb {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 18px;
+      height: 18px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .vertical-range::-webkit-slider-runnable-track {
+      background: transparent;
+    }
+
+    .vertical-range::-moz-range-track {
+      background: transparent;
+    }
+
+    .vertical-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+      cursor: pointer;
+    }
+
+    .vertical-range::-moz-range-thumb {
+      width: 180px;
+      height: 18px;
+      border: none;
+      border-radius: 50%;
+      background: var(--red);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+      cursor: pointer;
+    }
+
+    .slider-year-badge {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--red);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .chart-wrap {
+      flex: 1;
+      position: relative;
+      height: 740px;
+    }
+
+    .slider-year-badge {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--red);
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .chart-wrap {
+      flex: 1;
+      position: relative;
+      height: 740px; /* <--- Bilanciato perfettamente con il container dello slider */
+    }
+
+    .footnote {
+      margin-top: 14px;
+      color: #64748b;
+      font-size: 11px;
+      line-height: 1.55;
+    }
+
+    .year-info-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 10px 18px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: #08111f;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: transform .2s ease, filter .2s ease;
+    }
+
+    .year-info-link:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+    .equity-summary {
+      display: grid;
+      gap: 8px;
+      margin: 8px 0 14px;
+    }
+
+    .equity-summary div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 9px 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: rgba(255,255,255,.03);
+    }
+
+    .equity-summary span,
+    .equity-summary-note {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .equity-summary strong {
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .equity-summary-note {
+      margin: 0 0 12px;
+    }
+
+    @media (max-width: 1280px) {
+      .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .section-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+      .container { width: min(100% - 18px, 1450px); padding-top: 18px; }
+      .cards { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+      .chart-main-layout { flex-direction: column; }
+      .slider-vertical-container { height: 260px; width: 100%; flex-direction: column; }
+      .slider-track-wrap { height: auto; width: 48px; }
+      .vertical-range { width: 100%; height: 100%; }
+      .chart-wrap { height: 380px; width: 100%; }
+      .chart-head { flex-direction: column; align-items: flex-start; }
+      .chart-head .hint { text-align: left; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <div class="eyebrow">Wealth Strategy</div>
+      <h1>Simulatore Patrimoniale · 32 anni</h1>
+      <p class="subtitle">
+        Modifica i parametri e osserva in tempo reale l'evoluzione di BTP, Fondo Emergenze,
+        Fondo Pensione, Motore Azionario e Patrimonio Totale Netto.
+      </p>
+    </header>
+
+    <!-- RIEPILOGO: SITUAZIONE ATTUALE -->
+    <div class="recap-header">
+      Situazione Attuale
+      <span class="recap-badge" id="currentYearLabel">2026</span>
+    </div>
+    <section class="cards">
+      <div class="card" style="--card-color:#e2e8f0">
+        <div class="label">Versato</div>
+        <div class="value" id="cardCurrentContributed">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--orange)">
+        <div class="label">BTP</div>
+        <div class="value" id="cardCurrentBtp">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--pink)">
+        <div class="label">Emergenze</div>
+        <div class="value" id="cardCurrentEmergency">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--purple)">
+        <div class="label">Pensione</div>
+        <div class="value" id="cardCurrentPension">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--accent)">
+        <div class="label">PIR</div>
+        <div class="value" id="cardCurrentPir">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--cyan)">
+        <div class="label">Azionario</div>
+        <div class="value" id="cardCurrentEquity">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--green)">
+        <div class="label">Patrimonio</div>
+        <div class="value" id="cardCurrentTotal">€0</div>
+      </div>
+    </section>
+
+    <!-- RIEPILOGO: PROIEZIONE FINALE -->
+    <div class="recap-header">
+      Proiezione Finale
+      <span class="recap-badge" style="border-color: var(--border); background: rgba(255,255,255,0.03); color: var(--muted);">A Scadenza</span>
+    </div>
+    <section class="cards">
+      <div class="card" style="--card-color:#e2e8f0">
+        <div class="label">Versato</div>
+        <div class="value" id="cardContributed">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--orange)">
+        <div class="label">BTP</div>
+        <div class="value" id="cardBtp">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--pink)">
+        <div class="label">Emergenze</div>
+        <div class="value" id="cardEmergency">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--purple)">
+        <div class="label">Pensione</div>
+        <div class="value" id="cardPension">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--accent)">
+        <div class="label">PIR</div>
+        <div class="value" id="cardPir">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--cyan)">
+        <div class="label">Azionario</div>
+        <div class="value" id="cardEquity">€0</div>
+      </div>
+
+      <div class="card" style="--card-color:var(--green)">
+        <div class="label">Patrimonio</div>
+        <div class="value" id="cardTotal">€0</div>
+      </div>
+    </section>
+
+    <section class="section-grid">
+      <!-- BTP + Emergency -->
+      <div class="control-panel">
+        <div class="section-title">
+          <h2>1 · BTP & Fondo Emergenze</h2>
+          <span>BTP gestiti nei record</span>
+        </div>
+
+        <div class="equity-summary">
+          <div><span>Capitale BTP dai record</span><strong id="btpCapitalValue"></strong></div>
+          <div><span>Tasso medio dai record</span><strong id="btpReturnValue"></strong></div>
+        </div>
+        <p class="equity-summary-note">Data, importo, durata, tasso e frequenza si impostano nella pagina dei record.</p>
+        <a class="year-info-link" href="btpRecords.html">Apri Record BTP</a>
+        <input id="btpCapital" type="hidden" />
+        <input id="btpReturn" type="hidden" />
+
+        <div class="equity-summary">
+          <div><span>Capitale fondo emergenze</span><strong id="emergencyCapitalValue"></strong></div>
+          <div><span>Rendimento applicato</span><strong id="emergencyReturnValue"></strong></div>
+        </div>
+        <p class="equity-summary-note">Importo e rendimento vengono gestiti nella pagina dedicata.</p>
+        <a class="year-info-link" href="fondoEmergenze.html">Apri Fondo Emergenze</a>
+        <input id="emergencyCapital" type="hidden" />
+        <input id="emergencyReturn" type="hidden" />
+      </div>
+
+      <!-- Equity -->
+      <div class="control-panel">
+        <div class="section-title">
+          <h2>2 · Motore Azionario</h2>
+          <span>gestito in Esplora PAC</span>
+        </div>
+        <div class="equity-summary">
+          <div><span>Una tantum</span><strong id="lumpValue"></strong></div>
+          <div><span>PAC mensile</span><strong id="pacValue"></strong></div>
+          <div><span>Rendimento annuo</span><strong id="equityReturnValue"></strong></div>
+        </div>
+        <p class="equity-summary-note">Modifica questi valori nella pagina dedicata al PAC.</p>
+        <a class="year-info-link" href="esploraPAC.html">Apri Esplora PAC</a>
+        <input id="lumpSum" type="hidden" />
+        <input id="pacMonthly" type="hidden" />
+        <input id="equityReturn" type="hidden" />
+      </div>
+
+      <!-- Taxes & Regimes -->
+      <div class="control-panel">
+        <div class="section-title">
+          <h2>3 · Regimi Fiscali</h2>
+          <span>aliquote e allocazione</span>
+        </div>
+
+        <div class="equity-summary">
+          <div><span>Capitale PIR dal file</span><strong id="pirValue"></strong></div>
+        </div>
+        <p class="equity-summary-note">ETF, percentuali e capitale PIR vengono gestiti nella pagina dedicata.</p>
+        <a class="year-info-link" href="pir.html">Apri Portafoglio PIR</a>
+        <input id="pirShare" type="hidden" value="0" />
+
+        <div class="equity-summary">
+          <div><span>Capitale fondo pensione</span><strong id="pensionCapitalValue"></strong></div>
+        </div>
+        <p class="equity-summary-note">Il capitale viene inserito nella pagina dedicata, senza rendimento automatico.</p>
+        <a class="year-info-link" href="fondoPensione.html">Apri Fondo Pensione</a>
+        <input id="pensionShare" type="hidden" value="0" />
+
+        <div class="tax-info">
+          La tassazione del Fondo Pensione parte dal <strong>15%</strong> nei primi 15 anni e scende dello <strong>0,30%</strong> all'anno dal 16° anno fino al valore minimo del <strong>9%</strong>. Il residuo azionario tassato al <strong>26%</strong>.
+          <div class="tax-rate">
+            Aliquota FP a scadenza: <span id="finalPensionTaxLabel">15,00%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <h2>Evoluzione del patrimonio</h2>
+        <div class="hint">
+          Usa lo slider a sinistra per cambiare l'anno selezionato. Target fisso a €1.000.000.
+        </div>
+      </div>
+
+      <div class="chart-main-layout">
+        <!-- Slider Verticale per l'Anno (Corsa extralunga) -->
+        <div class="year-select-wrap">
+          <div class="timeline-cap">
+            Orizzonte
+            <strong id="timelineHorizonLabel">2026 - 2057</strong>
+          </div>
+          <div class="timeline-stat">
+            Durata
+            <strong>32 anni</strong>
+          </div>
+          <div class="timeline-stat">
+            Composizione
+            <strong>5 pilastri</strong>
+          </div>
+          <label class="year-select-label" for="yearSlider">Anno</label>
+          <select id="yearSlider" class="year-select" aria-label="Seleziona anno"></select>
+          <div class="timeline-current">
+            Anno selezionato
+            <strong id="timelineCurrentYear">2026</strong>
+          </div>
+          <div class="timeline-stat">
+            Obiettivo
+            <strong>€1.000.000</strong>
+          </div>
+          <a class="year-info-link" href="https://gemini.google.com/app/26bb3ddb99ab8012?hl=it" target="_blank" rel="noopener noreferrer">Informati</a>
+        </div>
+
+        <!-- Grafico -->
+        <div class="chart-wrap">
+          <canvas id="wealthChart"></canvas>
+        </div>
+      </div>
+
+      <div class="footnote">
+        Simulazione matematica: non considera costi gestionali, inflazione o volatilità di mercato.
+        Le aliquote fiscali sono calcolate sulle plusvalenze maturate nei rispettivi regimi.
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const CONFIG = {
+      btpCapital: 0,
+      btpReturn: 0,
+      emergencyCapital: 0,
+      emergencyReturn: 0,
+      lumpSum: 0,
+      pacMonthly: 0,
+      equityReturn: 7.0,
+      pirShare: 0,
+      pirCapital: 0,
+      pensionShare: 0,
+      pensionCapital: 0,
+
+      timelineStartYear: 2026,
+      currentYear: 2026,
+
+      btpStartYear: 2026,
+      btpRecords: [],
+      emergencyStartYear: 2026,
+      lumpStartYear: 2026,
+      pacStartYear: 2026,
+      pacChanges: [],
+
+      interestCapEmergency: 50000,
+      horizonYears: 32,
+      target: 1000000
+    };
+
+    const EUR = new Intl.NumberFormat("it-IT", {
+      style: "currency",
+      currency: "EUR",
+      maximumFractionDigits: 0
+    });
+
+    const PCT = new Intl.NumberFormat("it-IT", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+
+    const els = {
+      btpCapital: document.getElementById("btpCapital"),
+      btpReturn: document.getElementById("btpReturn"),
+      emergencyCapital: document.getElementById("emergencyCapital"),
+      emergencyReturn: document.getElementById("emergencyReturn"),
+      lumpSum: document.getElementById("lumpSum"),
+      pacMonthly: document.getElementById("pacMonthly"),
+      equityReturn: document.getElementById("equityReturn"),
+      pirShare: document.getElementById("pirShare"),
+      pensionShare: document.getElementById("pensionShare"),
+      yearSlider: document.getElementById("yearSlider"),
+
+      btpCapitalValue: document.getElementById("btpCapitalValue"),
+      btpReturnValue: document.getElementById("btpReturnValue"),
+      emergencyCapitalValue: document.getElementById("emergencyCapitalValue"),
+      emergencyReturnValue: document.getElementById("emergencyReturnValue"),
+      lumpValue: document.getElementById("lumpValue"),
+      pacValue: document.getElementById("pacValue"),
+      equityReturnValue: document.getElementById("equityReturnValue"),
+      pirValue: document.getElementById("pirValue"),
+      pensionCapitalValue: document.getElementById("pensionCapitalValue"),
+      cardCurrentPir: document.getElementById("cardCurrentPir"),
+      cardPir: document.getElementById("cardPir"),
+      finalPensionTaxLabel: document.getElementById("finalPensionTaxLabel"),
+      timelineCurrentYear: document.getElementById("timelineCurrentYear"),
+      explorePacLink: document.getElementById("explorePacLink"),
+
+      cardContributed: document.getElementById("cardContributed"),
+      cardBtp: document.getElementById("cardBtp"),
+      cardEmergency: document.getElementById("cardEmergency"),
+      cardPension: document.getElementById("cardPension"),
+      cardEquity: document.getElementById("cardEquity"),
+      cardTotal: document.getElementById("cardTotal"),
+
+      currentYearLabel: document.getElementById("currentYearLabel"),
+      cardCurrentContributed: document.getElementById("cardCurrentContributed"),
+      cardCurrentBtp: document.getElementById("cardCurrentBtp"),
+      cardCurrentEmergency: document.getElementById("cardCurrentEmergency"),
+      cardCurrentPension: document.getElementById("cardCurrentPension"),
+      cardCurrentEquity: document.getElementById("cardCurrentEquity"),
+      cardCurrentTotal: document.getElementById("cardCurrentTotal")
+    };
+
+    let chart;
+
+    function setDefaultValues() {
+      els.btpCapital.value = CONFIG.btpCapital;
+      els.btpReturn.value = CONFIG.btpReturn;
+      els.emergencyCapital.value = CONFIG.emergencyCapital;
+      els.emergencyReturn.value = CONFIG.emergencyReturn;
+      els.lumpSum.value = CONFIG.lumpSum;
+      els.pacMonthly.value = CONFIG.pacMonthly;
+      els.equityReturn.value = CONFIG.equityReturn;
+      els.pirShare.value = CONFIG.pirShare;
+      els.pensionShare.value = CONFIG.pensionShare;
+
+      const minYear = CONFIG.timelineStartYear;
+      const maxYear = CONFIG.timelineStartYear + CONFIG.horizonYears - 1;
+
+      els.yearSlider.innerHTML = "";
+      for (let year = minYear; year <= maxYear; year += 1) {
+        const option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        els.yearSlider.appendChild(option);
+      }
+      els.yearSlider.value = CONFIG.currentYear;
+      renderPacSchedule();
+    }
+
+    function readInputs() {
+      return {
+        btpCapital: Number(els.btpCapital.value),
+        btpReturn: Number(els.btpReturn.value) / 100,
+        emergencyCapital: Number(els.emergencyCapital.value),
+        emergencyReturn: Number(els.emergencyReturn.value) / 100,
+        lumpSum: Number(els.lumpSum.value),
+        pacMonthly: Number(els.pacMonthly.value),
+        equityReturn: Number(els.equityReturn.value) / 100,
+        pirShare: Number(els.pirShare.value) / 100,
+        pensionShare: Number(els.pensionShare.value) / 100
+      };
+    }
+
+    function readBtpRecords() {
+      try {
+        const saved = JSON.parse(localStorage.getItem("sim_btpRecords") || "[]");
+        return Array.isArray(saved) ? saved.filter(record =>
+          record.date && Number(record.amount) > 0 && Number(record.duration) > 0 && Number(record.rate) >= 0
+        ) : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function applyEmergencyFundToInputs() {
+      const savedAmount = Number(localStorage.getItem("sim_emergencyFund") || 0);
+      CONFIG.emergencyCapital = Math.max(0, savedAmount);
+      CONFIG.emergencyReturn = savedAmount > 0 ? 3 : 0;
+      els.emergencyCapital.value = CONFIG.emergencyCapital;
+      els.emergencyReturn.value = CONFIG.emergencyReturn;
+    }
+
+    function applyPensionFundToConfig() {
+      CONFIG.pensionCapital = Math.max(0, Number(localStorage.getItem("sim_pensionFund") || 0));
+    }
+
+    function applyPirSettingsToConfig() {
+      CONFIG.pirCapital = Math.max(0, Number(localStorage.getItem("sim_pirFund") || 0));
+      CONFIG.pirShare = 0;
+      els.pirShare.value = 0;
+    }
+
+    function applyPacRecordsToConfig() {
+      CONFIG.lumpSum = 0;
+      CONFIG.pacMonthly = 0;
+      CONFIG.pacChanges = [];
+
+      try {
+        const records = JSON.parse(localStorage.getItem("sim_pacRecords") || "[]");
+        if (!Array.isArray(records) || records.length === 0) return;
+
+        const monthlyRecords = records
+          .filter(record => record.source !== "transfer" && record.type === "monthly" && Number(record.amount) >= 0 && record.date)
+          .sort((first, second) => first.date.localeCompare(second.date));
+        const lumpRecords = records.filter(record => record.source !== "transfer" && record.type === "lump" && Number(record.amount) >= 0);
+
+        if (monthlyRecords.length > 0) {
+          CONFIG.pacMonthly = Number(monthlyRecords[0].amount);
+          CONFIG.pacChanges = monthlyRecords.slice(1).map(record => ({
+            year: new Date(`${record.date}T00:00:00`).getFullYear(),
+            amount: Number(record.amount)
+          }));
+        }
+        if (lumpRecords.length > 0) {
+          CONFIG.lumpSum = lumpRecords.reduce((total, record) => total + Number(record.amount), 0);
+        }
+      } catch {
+        // Mantiene i parametri gia presenti se i record non sono leggibili.
+      }
+    }
+
+    function applyBtpRecordsToInputs() {
+      if (CONFIG.btpRecords.length === 0) {
+        CONFIG.btpCapital = 0;
+        CONFIG.btpReturn = 0;
+        els.btpCapital.value = 0;
+        els.btpReturn.value = 0;
+        return;
+      }
+
+      const totalCapital = CONFIG.btpRecords.reduce((total, record) => total + Number(record.amount), 0);
+      const weightedRate = CONFIG.btpRecords.reduce(
+        (total, record) => total + (Number(record.amount) * Number(record.rate)),
+        0
+      ) / totalCapital;
+
+      CONFIG.btpCapital = totalCapital;
+      CONFIG.btpReturn = weightedRate;
+      els.btpCapital.max = Math.max(500000, totalCapital);
+      els.btpReturn.max = Math.max(10, weightedRate);
+      els.btpCapital.value = totalCapital;
+      els.btpReturn.value = weightedRate;
+    }
+
+    function getBtpPrincipalAtYear(year, inputs) {
+      if (CONFIG.btpRecords.length === 0) return inputs.btpCapital;
+      return CONFIG.btpRecords
+        .filter(record => {
+          const purchaseYear = new Date(`${record.date}T00:00:00`).getFullYear();
+          const maturityYear = purchaseYear + Number(record.duration);
+          return year >= purchaseYear && year < maturityYear;
+        })
+        .reduce((total, record) => total + Number(record.amount), 0);
+    }
+
+    function getPacMonthlyForYear(year, baseAmount) {
+      return CONFIG.pacChanges
+        .filter(change => year >= change.year)
+        .sort((first, second) => first.year - second.year)
+        .reduce((amount, change) => change.amount, baseAmount);
+    }
+
+    function savePacSchedule() {
+      localStorage.setItem("sim_pacChanges", JSON.stringify(CONFIG.pacChanges));
+      const params = new URLSearchParams({
+        lumpSum: els.lumpSum.value,
+        pacMonthly: els.pacMonthly.value,
+        equityReturn: els.equityReturn.value,
+        pacChanges: JSON.stringify(CONFIG.pacChanges)
+      });
+      if (els.explorePacLink) els.explorePacLink.href = `esploraPAC.html?${params.toString()}`;
+    }
+
+    function renderPacSchedule() {
+      if (!els.pacScheduleList) return;
+      els.pacScheduleList.innerHTML = "";
+
+      CONFIG.pacChanges.forEach((change, index) => {
+        const row = document.createElement("div");
+        row.className = "pac-change-row";
+        row.innerHTML = `
+          <input type="number" min="${CONFIG.timelineStartYear + 1}" max="${CONFIG.timelineStartYear + CONFIG.horizonYears - 1}" value="${change.year}" aria-label="Anno aumento PAC">
+          <input type="number" min="0" max="5000" step="50" value="${change.amount}" aria-label="Nuovo PAC mensile">
+          <button class="pac-change-remove" type="button" aria-label="Rimuovi aumento PAC">Rimuovi</button>
+        `;
+
+        const [yearInput, amountInput] = row.querySelectorAll("input");
+        yearInput.addEventListener("input", () => {
+          change.year = Number(yearInput.value) || CONFIG.timelineStartYear + 1;
+          savePacSchedule();
+          render();
+        });
+        amountInput.addEventListener("input", () => {
+          change.amount = Number(amountInput.value) || 0;
+          savePacSchedule();
+          render();
+        });
+        row.querySelector("button").addEventListener("click", () => {
+          CONFIG.pacChanges.splice(index, 1);
+          savePacSchedule();
+          renderPacSchedule();
+          render();
+        });
+        els.pacScheduleList.appendChild(row);
+      });
+    }
+
+    function saveSharedInvestmentInputs() {
+      localStorage.setItem("sim_lumpSum", els.lumpSum.value);
+      localStorage.setItem("sim_pacMonthly", els.pacMonthly.value);
+
+      const params = new URLSearchParams({
+        lumpSum: els.lumpSum.value,
+        pacMonthly: els.pacMonthly.value,
+        equityReturn: els.equityReturn.value,
+        pacChanges: JSON.stringify(CONFIG.pacChanges)
+      });
+      if (els.explorePacLink) els.explorePacLink.href = `esploraPAC.html?${params.toString()}`;
+    }
+
+    function formatCurrency(value) {
+      if (value === null || value === undefined) return "€0";
+      return EUR.format(Math.round(value));
+    }
+
+    function formatPercent(value) {
+      return PCT.format(value * 100) + "%";
+    }
+
+    function getPensionTaxRate(yearsElapsed) {
+      const discountYears = Math.max(0, yearsElapsed - 15);
+      const rate = 0.15 - (discountYears * 0.003);
+      return Math.max(0.09, rate);
+    }
+
+    function updateLabels(inputs) {
+      els.btpCapitalValue.textContent = formatCurrency(inputs.btpCapital);
+      els.btpReturnValue.textContent = formatPercent(inputs.btpReturn);
+      els.emergencyCapitalValue.textContent = formatCurrency(inputs.emergencyCapital);
+      els.emergencyReturnValue.textContent = formatPercent(inputs.emergencyReturn);
+      els.lumpValue.textContent = formatCurrency(inputs.lumpSum);
+      els.pacValue.textContent = formatCurrency(inputs.pacMonthly) + "/mese";
+      els.equityReturnValue.textContent = formatPercent(inputs.equityReturn);
+      els.pirValue.textContent = formatCurrency(CONFIG.pirCapital);
+      els.pensionCapitalValue.textContent = formatCurrency(CONFIG.pensionCapital);
+      els.timelineCurrentYear.textContent = CONFIG.currentYear;
+
+      const finalTax = getPensionTaxRate(CONFIG.horizonYears);
+      els.finalPensionTaxLabel.textContent = formatPercent(finalTax);
+    }
+
+    function simulateBtp(years, startYear, capital, annualReturn) {
+      const data = [];
+      let value = null;
+
+      for (const year of years) {
+        if (startYear === null || year < startYear) {
+          data.push(null);
+          continue;
+        }
+
+        if (value === null) {
+          value = capital;
+        } else {
+          value *= (1 + annualReturn);
+        }
+
+        data.push(value);
+      }
+
+      return data;
+    }
+
+    function simulateBtpRecords(years, records) {
+      return years.map(year => {
+        const activeRecords = records.filter(record => {
+          const purchaseYear = new Date(`${record.date}T00:00:00`).getFullYear();
+          return year >= purchaseYear;
+        });
+
+        if (activeRecords.length === 0) return null;
+
+        return activeRecords.reduce((total, record) => {
+          const purchaseDate = new Date(`${record.date}T00:00:00`);
+          const purchaseYear = purchaseDate.getFullYear();
+          const frequency = Number(record.frequency) > 0 ? Number(record.frequency) : 6;
+          const monthsElapsed = Math.max(0, (year - purchaseYear) * 12);
+          const periods = Math.min(
+            Math.floor(monthsElapsed / frequency),
+            Math.floor((Number(record.duration) * 12) / frequency)
+          );
+          const periodRate = (Number(record.rate) / 100) * (frequency / 12);
+          return total + Number(record.amount) * Math.pow(1 + periodRate, periods);
+        }, 0);
+      });
+    }
+
+    function simulateEmergency(years, startYear, capital, annualReturn, interestCap) {
+      const data = [];
+      let value = null;
+
+      for (const year of years) {
+        if (startYear === null || year < startYear) {
+          data.push(null);
+          continue;
+        }
+
+        if (value === null) {
+          value = capital;
+        } else {
+          const interestBase = Math.min(value, interestCap);
+          value += interestBase * annualReturn;
+        }
+
+        data.push(value);
+      }
+
+      return data;
+    }
+
+    function simulateEquity(years, inputs) {
+      const data = [];
+      let value = null;
+      let lumpInserted = false;
+
+      const monthlyRate = Math.pow(1 + inputs.equityReturn, 1 / 12) - 1;
+
+      for (const year of years) {
+        const lumpActive = CONFIG.lumpStartYear !== null && year >= CONFIG.lumpStartYear;
+        const pacActive = CONFIG.pacStartYear !== null && year >= CONFIG.pacStartYear;
+
+        if (!lumpActive && !pacActive && value === null) {
+          data.push(null);
+          continue;
+        }
+
+        if (value === null) value = 0;
+
+        if (lumpActive && !lumpInserted) {
+          value += inputs.lumpSum;
+          lumpInserted = true;
+        }
+
+        for (let month = 0; month < 12; month++) {
+          if (pacActive) {
+            value += getPacMonthlyForYear(year, inputs.pacMonthly);
+          }
+          value *= (1 + monthlyRate);
+        }
+
+        data.push(value);
+      }
+
+      return data;
+    }
+
+    function cumulativeContributions(years, inputs) {
+      const data = [];
+      let lumpInserted = false;
+      let cumulative = 0;
+
+      for (const year of years) {
+        const lumpActive = CONFIG.lumpStartYear !== null && year >= CONFIG.lumpStartYear;
+        const pacActive = CONFIG.pacStartYear !== null && year >= CONFIG.pacStartYear;
+        const anyActive = lumpActive || pacActive;
+
+        if (!anyActive && cumulative === 0) {
+          data.push(null);
+          continue;
+        }
+
+        if (lumpActive && !lumpInserted) {
+          cumulative += inputs.lumpSum;
+          lumpInserted = true;
+        }
+
+        if (pacActive) {
+          cumulative += getPacMonthlyForYear(year, inputs.pacMonthly) * 12;
+        }
+
+        data.push(cumulative);
+      }
+
+      return data;
+    }
+
+    function finalOrZero(arr) {
+      for (let i = arr.length - 1; i >= 0; i--) {
+        if (arr[i] !== null && Number.isFinite(arr[i])) return arr[i];
+      }
+      return 0;
+    }
+
+    function buildSimulation() {
+      const inputs = readInputs();
+      updateLabels(inputs);
+
+      const years = Array.from(
+        { length: CONFIG.horizonYears },
+        (_, i) => CONFIG.timelineStartYear + i
+      );
+
+      const btp = CONFIG.btpRecords.length > 0
+        ? simulateBtpRecords(years, CONFIG.btpRecords)
+        : simulateBtp(years, CONFIG.btpStartYear, inputs.btpCapital, inputs.btpReturn);
+
+      const emergency = simulateEmergency(
+        years,
+        CONFIG.emergencyStartYear,
+        inputs.emergencyCapital,
+        inputs.emergencyReturn,
+        CONFIG.interestCapEmergency
+      );
+
+      const equityGross = simulateEquity(years, inputs);
+      const contributions = cumulativeContributions(years, inputs);
+
+      const pensionNetSeries = [];
+      const pirNetSeries = [];
+      const ordinaryEquityNetSeries = [];
+      const totalNet = [];
+
+      years.forEach((_, i) => {
+        const gross = equityGross[i];
+        if (gross === null) {
+          pensionNetSeries.push(CONFIG.pensionCapital > 0 ? CONFIG.pensionCapital : null);
+          pirNetSeries.push(CONFIG.pirCapital > 0 ? CONFIG.pirCapital : null);
+          ordinaryEquityNetSeries.push(null);
+        } else {
+          const contrib = contributions[i] ?? 0;
+          const gain = Math.max(0, gross - contrib);
+
+          const fpTax = getPensionTaxRate(i + 1);
+
+          const ordNet = gross - (gain * 0.26);
+
+          pensionNetSeries.push(CONFIG.pensionCapital);
+          pirNetSeries.push(CONFIG.pirCapital);
+          ordinaryEquityNetSeries.push(ordNet);
+        }
+
+        const parts = [btp[i], emergency[i], pensionNetSeries[i], pirNetSeries[i], ordinaryEquityNetSeries[i]];
+        const active = parts.some(v => v !== null);
+
+        if (!active) {
+          totalNet.push(null);
+        } else {
+          totalNet.push(parts.reduce((sum, v) => sum + (v ?? 0), 0));
+        }
+      });
+
+      const finalBtp = finalOrZero(btp);
+      const finalEmergency = finalOrZero(emergency);
+      const finalPension = finalOrZero(pensionNetSeries);
+      const finalPir = finalOrZero(pirNetSeries);
+      const finalEquity = finalOrZero(ordinaryEquityNetSeries);
+      const finalTotal = finalBtp + finalEmergency + finalPension + finalPir + finalEquity;
+
+      const lastYear = years[years.length - 1];
+      const btpInitialCounted = getBtpPrincipalAtYear(lastYear, inputs);
+      const emergencyInitialCounted = (CONFIG.emergencyStartYear !== null && CONFIG.emergencyStartYear <= lastYear) ? inputs.emergencyCapital : 0;
+
+      const finalContributed = finalOrZero(contributions) + btpInitialCounted + emergencyInitialCounted + CONFIG.pensionCapital + CONFIG.pirCapital;
+
+      return {
+        years,
+        btp,
+        emergency,
+        pensionNetSeries,
+        pirNetSeries,
+        ordinaryEquityNetSeries,
+        contributions,
+        totalNet,
+        finalBtp,
+        finalEmergency,
+        finalPension,
+        finalPir,
+        finalEquity,
+        finalTotal,
+        finalContributed,
+        inputs
+      };
+    }
+
+    function pointRadii(years, pointYear) {
+      return years.map(year => year === pointYear ? 7 : 1.8);
+    }
+
+    function pointColors(years, pointYear, defaultColor) {
+      return years.map(year => year === pointYear ? "#ef4444" : defaultColor);
+    }
+
+    function createOrUpdateChart(sim) {
+      const ctx = document.getElementById("wealthChart").getContext("2d");
+
+      const pointRadiusTotal = pointRadii(sim.years, CONFIG.currentYear);
+      const pointColorTotal = pointColors(sim.years, CONFIG.currentYear, "#22c55e");
+
+      const datasets = [
+        {
+          label: "Patrimonio Totale Netto",
+          data: sim.totalNet,
+          borderColor: "#22c55e",
+          backgroundColor: "rgba(34,197,94,.12)",
+          pointRadius: pointRadiusTotal,
+          pointHoverRadius: 8,
+          pointBackgroundColor: pointColorTotal,
+          pointBorderColor: pointColorTotal,
+          borderWidth: 3,
+          tension: 0.28,
+          fill: false,
+          spanGaps: false
+        },
+        {
+          label: "Fondo Pensione",
+          data: sim.pensionNetSeries,
+          borderColor: "#a855f7",
+          pointRadius: 0,
+          borderWidth: 2,
+          borderDash: [6, 6],
+          tension: 0.25,
+          fill: false,
+          spanGaps: false
+        },
+        {
+          label: "Portafoglio PIR",
+          data: sim.pirNetSeries,
+          borderColor: "#60a5fa",
+          pointRadius: 0,
+          borderWidth: 2,
+          borderDash: [5, 5],
+          tension: 0.25,
+          fill: false,
+          spanGaps: false
+        },
+        {
+          label: "Motore Azionario",
+          data: sim.ordinaryEquityNetSeries,
+          borderColor: "#38bdf8",
+          pointRadius: 0,
+          borderWidth: 2,
+          borderDash: [7, 6],
+          tension: 0.25,
+          fill: false,
+          spanGaps: false
+        },
+        {
+          label: "Valore BTP",
+          data: sim.btp,
+          borderColor: "#f59e0b",
+          pointRadius: 0,
+          borderWidth: 2,
+          borderDash: [7, 6],
+          tension: 0.25,
+          fill: false,
+          spanGaps: false
+        },
+        {
+          label: "Fondo Emergenze",
+          data: sim.emergency,
+          borderColor: "#ec4899",
+          pointRadius: 0,
+          borderWidth: 2,
+          borderDash: [7, 6],
+          tension: 0.25,
+          fill: false,
+          spanGaps: false
+        },
+        {
+          label: "Capitale Investito",
+          data: sim.contributions,
+          borderColor: "#64748b",
+          pointRadius: 0,
+          borderWidth: 1.5,
+          tension: 0.15,
+          fill: false,
+          spanGaps: false
+        },
+        {
+          label: "Target €1.000.000",
+          data: sim.years.map(() => CONFIG.target),
+          borderColor: "#94a3b8",
+          pointRadius: 0,
+          borderWidth: 1.5,
+          borderDash: [3, 6],
+          tension: 0,
+          fill: false
+        }
+      ];
+
+      const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: "index"
+        },
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              color: "#cbd5e1",
+              usePointStyle: true,
+              pointStyle: "line",
+              padding: 18
+            }
+          },
+          tooltip: {
+            backgroundColor: "rgba(15,23,42,.96)",
+            titleColor: "#f8fafc",
+            bodyColor: "#cbd5e1",
+            borderColor: "rgba(255,255,255,.12)",
+            borderWidth: 1,
+            padding: 12,
+            callbacks: {
+              label: function(context) {
+                const value = context.raw;
+                return `${context.dataset.label}: ${value == null ? "—" : formatCurrency(value)}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: "rgba(148,163,184,.07)" },
+            ticks: { color: "#94a3b8" },
+            title: { display: true, text: "Anno", color: "#64748b" }
+          },
+          y: {
+            beginAtZero: true,
+            grid: { color: "rgba(148,163,184,.09)" },
+            ticks: {
+              color: "#94a3b8",
+              callback: value => formatCurrency(value)
+            }
+          }
+        }
+      };
+
+      if (!chart) {
+        chart = new Chart(ctx, {
+          type: "line",
+          data: { labels: sim.years, datasets },
+          options
+        });
+      } else {
+        chart.data.labels = sim.years;
+        chart.data.datasets = datasets;
+        chart.options = options;
+        chart.update("none");
+      }
+    }
+
+    function updateCards(sim) {
+      els.cardContributed.textContent = formatCurrency(sim.finalContributed);
+      els.cardBtp.textContent = formatCurrency(sim.finalBtp);
+      els.cardEmergency.textContent = formatCurrency(sim.finalEmergency);
+      els.cardPension.textContent = formatCurrency(sim.finalPension);
+      els.cardPir.textContent = formatCurrency(sim.finalPir);
+      els.cardEquity.textContent = formatCurrency(sim.finalEquity);
+      els.cardTotal.textContent = formatCurrency(sim.finalTotal);
+
+      els.currentYearLabel.textContent = CONFIG.currentYear;
+      
+      const currIndex = sim.years.indexOf(CONFIG.currentYear);
+      if (currIndex !== -1) {
+        const currBtp = sim.btp[currIndex] ?? 0;
+        const currEmergency = sim.emergency[currIndex] ?? 0;
+        const currPension = sim.pensionNetSeries[currIndex] ?? 0;
+        const currPir = sim.pirNetSeries[currIndex] ?? 0;
+        const currEquity = sim.ordinaryEquityNetSeries[currIndex] ?? 0;
+        const currTotal = sim.totalNet[currIndex] ?? 0;
+
+        const btpInitialCurr = getBtpPrincipalAtYear(CONFIG.currentYear, sim.inputs);
+        const emergencyInitialCurr = (CONFIG.emergencyStartYear !== null && CONFIG.emergencyStartYear <= CONFIG.currentYear) ? sim.inputs.emergencyCapital : 0;
+        const currContributed = (sim.contributions[currIndex] ?? 0) + btpInitialCurr + emergencyInitialCurr + CONFIG.pensionCapital + CONFIG.pirCapital;
+
+        els.cardCurrentContributed.textContent = formatCurrency(currContributed);
+        els.cardCurrentBtp.textContent = formatCurrency(currBtp);
+        els.cardCurrentEmergency.textContent = formatCurrency(currEmergency);
+        els.cardCurrentPension.textContent = formatCurrency(currPension);
+        els.cardCurrentPir.textContent = formatCurrency(currPir);
+        els.cardCurrentEquity.textContent = formatCurrency(currEquity);
+        els.cardCurrentTotal.textContent = formatCurrency(currTotal);
+      }
+    }
+
+    function render() {
+      const sim = buildSimulation();
+      updateCards(sim);
+      createOrUpdateChart(sim);
+    }
+
+    els.yearSlider.addEventListener("input", (e) => {
+      CONFIG.currentYear = Number(e.target.value);
+      render();
+    });
+
+    [
+      els.btpCapital,
+      els.btpReturn,
+      els.emergencyCapital,
+      els.emergencyReturn,
+      els.lumpSum,
+      els.pacMonthly,
+      els.equityReturn,
+      els.pirShare,
+      els.pensionShare
+    ].forEach(input => input.addEventListener("input", () => {
+      saveSharedInvestmentInputs();
+      render();
+    }));
+
+    const savedPacChanges = localStorage.getItem("sim_pacChanges");
+    if (savedPacChanges) {
+      try {
+        CONFIG.pacChanges = JSON.parse(savedPacChanges).filter(change => Number.isFinite(Number(change.year)) && Number.isFinite(Number(change.amount)));
+      } catch {
+        CONFIG.pacChanges = [];
+      }
+    }
+
+    CONFIG.btpRecords = readBtpRecords();
+    setDefaultValues();
+    const sharedLumpSum = localStorage.getItem("sim_lumpSum");
+    const sharedPacMonthly = localStorage.getItem("sim_pacMonthly");
+    const sharedEquityReturn = localStorage.getItem("sim_equityReturn");
+    if (sharedLumpSum !== null) {
+      CONFIG.lumpSum = Number(sharedLumpSum);
+      els.lumpSum.value = CONFIG.lumpSum;
+    }
+    if (sharedPacMonthly !== null) {
+      CONFIG.pacMonthly = Number(sharedPacMonthly);
+      els.pacMonthly.value = CONFIG.pacMonthly;
+    }
+    if (sharedEquityReturn !== null) {
+      CONFIG.equityReturn = Number(sharedEquityReturn);
+      els.equityReturn.value = CONFIG.equityReturn;
+    }
+    applyPacRecordsToConfig();
+    els.lumpSum.value = CONFIG.lumpSum;
+    els.pacMonthly.value = CONFIG.pacMonthly;
+    applyEmergencyFundToInputs();
+    applyPensionFundToConfig();
+    applyPirSettingsToConfig();
+    applyBtpRecordsToInputs();
+    saveSharedInvestmentInputs();
+    render();
+
+  </script>
+</body>
+</html>
