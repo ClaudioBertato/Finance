@@ -55,7 +55,7 @@
         <h1>Fondo Emergenze</h1>
         <p class="subtitle">Inserisci il capitale totale. Il simulatore riconoscerà automaticamente il fondo e applicherà il rendimento previsto.</p>
       </div>
-      <a class="back-link" href="simulatorePatrimonio.html">Torna al simulatore</a>
+      <a class="back-link" href="simulatorePatrimonio.html">Torna alla Dashboard</a>
     </header>
 
     <section class="panel">
@@ -72,31 +72,31 @@
   </main>
 
   <script>
-    const STORAGE_KEY = "sim_emergencyFund";
-    const INTEREST_RATE = 0.03;
-    const INTEREST_CAP = 50000;
-    const amountInput = document.getElementById("emergencyAmount");
-    const annualInterest = document.getElementById("annualInterest");
-    const afterOneYear = document.getElementById("afterOneYear");
-    const interestBase = document.getElementById("interestBase");
-    const status = document.getElementById("status");
-    const EUR = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
+  const STORAGE_KEY = "sim_emergencyFund";
+  const INTEREST_RATE = 0.03;
+  const INTEREST_CAP = 50000;
+  const amountInput = document.getElementById("emergencyAmount");
+  const annualInterest = document.getElementById("annualInterest");
+  const afterOneYear = document.getElementById("afterOneYear");
+  const interestBase = document.getElementById("interestBase");
+  const status = document.getElementById("status");
+  const EUR = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 
-    amountInput.value = Number(localStorage.getItem(STORAGE_KEY) || 0);
+  amountInput.value = Number(localStorage.getItem(STORAGE_KEY) || 0);
 
-    function updateFund() {
-      const amount = Math.max(0, Number(amountInput.value) || 0);
-      const base = Math.min(amount, INTEREST_CAP);
-      const interest = base * INTEREST_RATE;
-      localStorage.setItem(STORAGE_KEY, String(amount));
-      annualInterest.textContent = EUR.format(interest);
-      afterOneYear.textContent = EUR.format(amount + interest);
-      interestBase.textContent = EUR.format(base);
-      status.textContent = "Valore salvato automaticamente.";
-    }
+  function updateFund() {
+    const amount = Math.max(0, Number(amountInput.value) || 0);
+    const base = Math.min(amount, INTEREST_CAP);
+    const interest = base * INTEREST_RATE;
+    localStorage.setItem(STORAGE_KEY, String(amount));
+    annualInterest.textContent = EUR.format(interest);
+    afterOneYear.textContent = EUR.format(amount + interest);
+    interestBase.textContent = EUR.format(base);
+    status.textContent = "Valore salvato automaticamente.";
+  }
 
-    amountInput.addEventListener("input", updateFund);
-    updateFund();
-  </script>
+  amountInput.addEventListener("input", updateFund);
+  updateFund();
+</script>
 </body>
 </html>

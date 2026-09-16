@@ -1,0 +1,833 @@
+<!-- gestioneStipendio.html -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gestione Stipendio & Spese</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #11182c;
+      --panel-2: #16203a;
+      --border: rgba(255,255,255,.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --purple: #a855f7;
+      --cyan: #06b6d4;
+      --pink: #ec4899;
+      --shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 15% 10%, rgba(96,165,250,.13), transparent 28%), var(--bg);
+      color: var(--text);
+    }
+
+    .container { width: min(1250px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 48px; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 24px; }
+    .eyebrow { color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 8px 0 0; font-size: clamp(30px, 4vw, 46px); line-height: 1.05; }
+    .subtitle { max-width: 720px; margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+    
+    .panel { padding: 22px; background: rgba(17,24,44,.84); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); backdrop-filter: blur(14px); margin-bottom: 20px; }
+    .panel h2 { margin: 0 0 16px; font-size: 18px; }
+    
+    .grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+    
+    form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .full-width { grid-column: span 2; }
+    label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    input, select { width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit; }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+    
+    .stats-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .stat-card { padding: 14px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; }
+    .stat-card span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .stat-card strong { display: block; margin-top: 6px; font-size: 18px; }
+    .stat-card.good strong { color: var(--green); }
+    .stat-card.bad strong { color: var(--red); }
+    
+    .table-wrap { margin-top: 14px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+    .badge { padding: 3px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; display: inline-block; }
+    .back-link, button { border: 0; border-radius: 10px; padding: 10px 14px; color: #08111f; background: var(--accent); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; cursor: pointer; }
+    .chart-container { position: relative; height: 320px; margin-top: 10px; }
+    .btn { border: 0; border-radius: 10px; padding: 10px 16px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-primary { background: var(--accent); color: #08111f; }
+    .btn-success { background: var(--green); color: #08111f; }
+    .btn-purple { background: var(--purple); color: #ffffff; }
+    .remove { padding: 5px 8px; color: var(--text); background: rgba(239,68,68,.16); border: 1px solid rgba(239,68,68,.35); border-radius: 6px; cursor: pointer; }
+
+    /* Subscriptions section styling */
+    .sub-summary-banner {
+      display: flex;
+      gap: 16px;
+      background: rgba(168,85,247,.08);
+      border: 1px solid rgba(168,85,247,.25);
+      padding: 14px 18px;
+      border-radius: 12px;
+      margin-top: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: flex-start; }
+      .stats-summary { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div>
+        <div class="eyebrow">Gestione Casa · Budget & Bilancio</div>
+        <h1>Gestione Stipendio & Spese</h1>
+        <p class="subtitle">Imposta lo stipendio, gestisci abbonamenti ricorrenti, registra le uscite e traccia patrimonio e investimenti nel tempo.</p>
+      </div>
+
+      <!-- NAVIGAZIONE -->
+      <a class="back-link" href="simulatorePatrimonio.html">Torna al simulatore</a>
+    </header>
+
+    <!-- SEZIONE STIPENDIO -->
+    <section class="panel">
+      <h2>Stipendio Mensile di Riferimento</h2>
+      <div style="max-width: 380px;">
+        <label>Importo Stipendio Mensile (€)
+          <input id="salaryInput" type="number" step="0.01" min="0" placeholder="es. 1600.00" value="0" />
+        </label>
+      </div>
+    </section>
+
+    <!-- SEZIONE TRACCIATORE ABBONAMENTI & SPESE RICORRENTI -->
+    <section class="panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+        <div>
+          <h2 style="margin: 0;">📱 Abbonamenti & Spese Ricorrenti</h2>
+          <span style="color: var(--muted); font-size: 13px;">Registra le spese fisse periodiche (streaming, palestra, bollette fisse) e importale subito nel mese corrente.</span>
+        </div>
+        <button id="importSubsBtn" class="btn btn-purple">⚡ Importa Ricorrenti nel Mese</button>
+      </div>
+
+      <div class="grid" style="grid-template-columns: 1fr 1.3fr; align-items: start;">
+        <!-- Form aggiunta abbonamento -->
+        <form id="subForm" style="background: rgba(255,255,255,.02); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
+          <label class="full-width">Nome Servizio / Uscita Fissa
+            <input id="subName" type="text" placeholder="es. Netflix, Palestra, Spotify..." required />
+          </label>
+          <label>Importo (€)
+            <input id="subAmount" type="number" step="0.01" min="0.01" placeholder="es. 15.99" required />
+          </label>
+          <label>Frequenza
+            <select id="subFreq" required>
+              <option value="mensile" selected>Mensile</option>
+              <option value="annuale">Annuale</option>
+            </select>
+          </label>
+          <label class="full-width">Categoria
+            <select id="subCategory" required>
+              <option value="svago" selected>Svago & Streaming</option>
+              <option value="bolletta">Bolletta / Utenza</option>
+              <option value="spesa">Palestra / Salute</option>
+              <option value="investimento">PAC / Investimento Fisso</option>
+              <option value="altro">Altro / Servizio</option>
+            </select>
+          </label>
+          <div class="full-width">
+            <button class="btn btn-primary" type="submit" style="width: 100%;">+ Aggiungi Ricorrente</button>
+          </div>
+        </form>
+
+        <!-- Tabella abbonamenti registrati -->
+        <div>
+          <div class="table-wrap" style="margin-top: 0;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Servizio</th>
+                  <th>Freq.</th>
+                  <th>Imp. Singolo</th>
+                  <th>Costo Mensile Eq.</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="subsTableBody"></tbody>
+            </table>
+            <div id="emptySubsState" style="text-align: center; padding: 16px; color: var(--muted);">Nessun abbonamento registrato.</div>
+          </div>
+
+          <!-- Banner impatto annuale -->
+          <div class="sub-summary-banner">
+            <div>
+              <span style="display: block; font-size: 10px; font-weight: 800; color: var(--purple); text-transform: uppercase;">💳 Totale Impatto Annuo</span>
+              <strong id="subAnnualTotal" style="font-size: 20px; color: var(--text);">€ 0,00 / anno</strong>
+            </div>
+            <div style="margin-left: auto; text-align: right;">
+              <span style="display: block; font-size: 10px; font-weight: 800; color: var(--muted); text-transform: uppercase;">Costo Mensile Fisso</span>
+              <strong id="subMonthlyTotal" style="font-size: 16px; color: var(--accent);">€ 0,00 / mese</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      <!-- FORM E GRAFICO -->
+      <section class="panel">
+        <h2>Registra Nuova Spesa / Investimento</h2>
+        <form id="expenseForm">
+          <label>Importo (€)
+            <input id="expAmount" type="number" step="0.01" min="0.01" placeholder="es. 85.00" required />
+          </label>
+          <label>Data
+            <input id="expDate" type="date" required />
+          </label>
+          <label class="full-width">Categoria / Causale
+            <select id="expCategory" required>
+              <option value="bolletta">Bolletta</option>
+              <option value="mutuo">Mutuo</option>
+              <option value="affitto">Affitto</option>
+              <option value="spesa">Spesa Alimentare</option>
+              <option value="investimento" selected>Investimento (PAC, ETF, BTP...)</option>
+              <option value="svago">Svago & Tempo Libero</option>
+              <option value="altro">Altro</option>
+            </select>
+          </label>
+          <label class="full-width">Note / Descrizione (Opzionale)
+            <input id="expNote" type="text" placeholder="es. PAC VWCE, Enel Energia..." />
+          </label>
+          <div class="full-width">
+            <button class="btn btn-primary" type="submit" style="width: 100%;">Aggiungi Spesa / Investimento</button>
+          </div>
+        </form>
+
+        <div style="margin-top: 24px;">
+          <h2>Ripartizione Budget</h2>
+          <div class="chart-container">
+            <canvas id="salaryPieChart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIEPILOGO E TABELLA SPESE CORRENTI -->
+      <section class="panel">
+        <h2>Riepilogo & Storico Uscite</h2>
+
+        <div class="stats-summary">
+          <div class="stat-card">
+            <span>Stipendio</span>
+            <strong id="cardSalary">€ 0,00</strong>
+          </div>
+          <div class="stat-card">
+            <span>Totale Uscite</span>
+            <strong id="cardTotalSpent" style="color: var(--yellow);">€ 0,00</strong>
+          </div>
+          <div class="stat-card" id="cardRemainingBox">
+            <span>Rimanente / Risparmi</span>
+            <strong id="cardRemaining">€ 0,00</strong>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Categoria</th>
+                <th>Note</th>
+                <th>Importo</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="expensesTableBody"></tbody>
+          </table>
+          <div id="emptyState" style="text-align: center; padding: 20px; color: var(--muted);">Nessuna voce registrata per questo mese.</div>
+        </div>
+      </section>
+    </div>
+
+    <!-- SEZIONE STORICO RECAP MESI ARCHIVIATI -->
+    <section class="panel" style="margin-top: 20px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 20px;">
+        <div>
+          <h2 style="margin: 0;">Storico Recap Mesi Archiviati</h2>
+          <span style="color: var(--muted); font-size: 13px;">Salva il riepilogo del mese corrente per tracciare spesa e capitale investito.</span>
+        </div>
+        <button id="saveMonthBtn" class="btn btn-success">💾 Salva Mese Corrente</button>
+      </div>
+
+      <!-- BANNER ACCUMULO INVESTIMENTI -->
+      <div style="display: flex; gap: 16px; background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.25); padding: 14px 18px; border-radius: 12px; margin-bottom: 16px; align-items: center; flex-wrap: wrap;">
+        <div>
+          <span style="display: block; font-size: 11px; font-weight: 800; color: var(--green); text-transform: uppercase;">📈 Totale Cumulativo Investito</span>
+          <strong id="totalInvestedAccumulated" style="font-size: 22px; color: var(--text);">€ 0,00</strong>
+        </div>
+        <span style="font-size: 12px; color: var(--muted); max-width: 500px; margin-left: auto;">
+          Somma totale di tutti gli investimenti versati nei mesi archiviati nello storico.
+        </span>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Mese / Anno</th>
+              <th>Stipendio</th>
+              <th>Totale Uscite</th>
+              <th>Investimenti</th>
+              <th>Risparmi / Rimanente</th>
+              <th>N° Spese</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="historyTableBody"></tbody>
+        </table>
+        <div id="emptyHistoryState" style="text-align: center; padding: 20px; color: var(--muted);">Nessun mese archiviato. Clicca su "Salva Mese Corrente" per creare il tuo primo recap.</div>
+      </div>
+    </section>
+
+    <!-- SEZIONE GRAFICO CARTESIANO (ANDAMENTO TEMPORALE) -->
+    <section class="panel" style="margin-top: 20px;">
+      <h2>📈 Andamento Storico nel Tempo</h2>
+      <p style="color: var(--muted); font-size: 13px; margin-top: -10px; margin-bottom: 20px;">
+        Evoluzione mensile delle rette di Stipendio, Uscite, Investimenti e Risparmi rimasti.
+      </p>
+      <div class="chart-container" style="height: 380px;">
+        <canvas id="historyLineChart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SALARY_KEY = "sim_salary_amount";
+    const EXPENSES_KEY = "sim_expenses_list";
+    const HISTORY_KEY = "sim_monthly_history";
+    const SUBSCRIPTIONS_KEY = "sim_subscriptions_list";
+
+    const EUR = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
+    const PERCENT = new Intl.NumberFormat("it-IT", { style: "percent", minimumFractionDigits: 1 });
+
+    const salaryInput = document.getElementById("salaryInput");
+    const expenseForm = document.getElementById("expenseForm");
+    const expAmount = document.getElementById("expAmount");
+    const expDate = document.getElementById("expDate");
+    const expCategory = document.getElementById("expCategory");
+    const expNote = document.getElementById("expNote");
+    
+    const tbody = document.getElementById("expensesTableBody");
+    const emptyState = document.getElementById("emptyState");
+    const cardSalary = document.getElementById("cardSalary");
+    const cardTotalSpent = document.getElementById("cardTotalSpent");
+    const cardRemaining = document.getElementById("cardRemaining");
+    const cardRemainingBox = document.getElementById("cardRemainingBox");
+
+    const saveMonthBtn = document.getElementById("saveMonthBtn");
+    const historyTbody = document.getElementById("historyTableBody");
+    const emptyHistoryState = document.getElementById("emptyHistoryState");
+    const totalInvestedAccumulated = document.getElementById("totalInvestedAccumulated");
+
+    // Elementi Abbonamenti
+    const subForm = document.getElementById("subForm");
+    const subName = document.getElementById("subName");
+    const subAmount = document.getElementById("subAmount");
+    const subFreq = document.getElementById("subFreq");
+    const subCategory = document.getElementById("subCategory");
+    const subsTableBody = document.getElementById("subsTableBody");
+    const emptySubsState = document.getElementById("emptySubsState");
+    const subAnnualTotal = document.getElementById("subAnnualTotal");
+    const subMonthlyTotal = document.getElementById("subMonthlyTotal");
+    const importSubsBtn = document.getElementById("importSubsBtn");
+
+    let chart;
+    let lineChart;
+
+    expDate.value = new Date().toISOString().slice(0, 10);
+
+    const CATEGORY_COLORS = {
+      bolletta: "#f59e0b",
+      mutuo: "#ef4444",
+      affitto: "#a855f7",
+      spesa: "#06b6d4",
+      investimento: "#22c55e",
+      svago: "#ec4899",
+      altro: "#64748b",
+      risparmi: "#3b82f6"
+    };
+
+    function loadSalary() {
+      const saved = localStorage.getItem(SALARY_KEY);
+      if (saved !== null) salaryInput.value = saved;
+    }
+
+    function saveSalary() {
+      localStorage.setItem(SALARY_KEY, salaryInput.value);
+      render();
+    }
+
+    salaryInput.addEventListener("input", saveSalary);
+
+    function readExpenses() {
+      try { return JSON.parse(localStorage.getItem(EXPENSES_KEY) || "[]"); }
+      catch { return []; }
+    }
+
+    function saveExpenses(data) {
+      localStorage.setItem(EXPENSES_KEY, JSON.stringify(data));
+    }
+
+    function readHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); }
+      catch { return []; }
+    }
+
+    function saveHistory(data) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(data));
+    }
+
+    function readSubscriptions() {
+      try { return JSON.parse(localStorage.getItem(SUBSCRIPTIONS_KEY) || "[]"); }
+      catch { return []; }
+    }
+
+    function saveSubscriptions(data) {
+      localStorage.setItem(SUBSCRIPTIONS_KEY, JSON.stringify(data));
+    }
+
+    function formatDate(str) {
+      return new Intl.DateTimeFormat("it-IT").format(new Date(`${str}T00:00:00`));
+    }
+
+    // GESTIONE ABBONAMENTI
+    function renderSubscriptions() {
+      const subs = readSubscriptions();
+      subsTableBody.innerHTML = "";
+      emptySubsState.hidden = subs.length > 0;
+
+      let monthlyTotal = 0;
+      let annualTotal = 0;
+
+      subs.forEach((item, index) => {
+        const costMonthly = item.freq === "annuale" ? (item.amount / 12) : item.amount;
+        const costAnnual = item.freq === "annuale" ? item.amount : (item.amount * 12);
+
+        monthlyTotal += costMonthly;
+        annualTotal += costAnnual;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${item.name}</strong></td>
+          <td><span class="badge" style="background: rgba(168,85,247,.15); color: var(--purple); border: 1px solid rgba(168,85,247,.3);">${item.freq}</span></td>
+          <td>${EUR.format(item.amount)}</td>
+          <td style="color: var(--accent);"><strong>${EUR.format(costMonthly)}/m</strong></td>
+          <td><button class="remove" data-sidx="${index}">✕</button></td>
+        `;
+        subsTableBody.appendChild(tr);
+      });
+
+      subMonthlyTotal.textContent = `${EUR.format(monthlyTotal)} / mese`;
+      subAnnualTotal.textContent = `${EUR.format(annualTotal)} / anno`;
+
+      subsTableBody.querySelectorAll(".remove").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const list = readSubscriptions();
+          list.splice(Number(btn.dataset.sidx), 1);
+          saveSubscriptions(list);
+          renderSubscriptions();
+        });
+      });
+    }
+
+    subForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const list = readSubscriptions();
+      list.push({
+        id: Date.now(),
+        name: subName.value.trim(),
+        amount: parseFloat(subAmount.value),
+        freq: subFreq.value,
+        category: subCategory.value
+      });
+      saveSubscriptions(list);
+      subName.value = "";
+      subAmount.value = "";
+      renderSubscriptions();
+    });
+
+    importSubsBtn.addEventListener("click", () => {
+      const subs = readSubscriptions();
+      if (subs.length === 0) {
+        alert("Non hai abbonamenti o spese ricorrenti salvate da importare!");
+        return;
+      }
+
+      if (!confirm(`Vuoi importare ${subs.length} uscite fisse nelle spese del mese corrente?`)) {
+        return;
+      }
+
+      const expenses = readExpenses();
+      const today = new Date().toISOString().slice(0, 10);
+
+      subs.forEach(sub => {
+        const importAmount = sub.freq === "annuale" ? parseFloat((sub.amount / 12).toFixed(2)) : sub.amount;
+        const note = sub.freq === "annuale" ? `${sub.name} (Quota mensile di ${EUR.format(sub.amount)}/anno)` : `${sub.name} (Ricorrente)`;
+
+        expenses.push({
+          amount: importAmount,
+          date: today,
+          category: sub.category,
+          note: note
+        });
+      });
+
+      saveExpenses(expenses);
+      render();
+      alert("Abbonamenti e uscite fisse importate con successo!");
+    });
+
+    // RENDER GENERALE
+    function render() {
+      const salary = parseFloat(salaryInput.value) || 0;
+      const expenses = readExpenses().sort((a, b) => b.date.localeCompare(a.date));
+
+      tbody.innerHTML = "";
+      emptyState.hidden = expenses.length > 0;
+
+      let totalSpent = 0;
+      const categoryTotals = { bolletta: 0, mutuo: 0, affitto: 0, spesa: 0, investimento: 0, svago: 0, altro: 0 };
+
+      expenses.forEach((item, index) => {
+        totalSpent += item.amount;
+        if (categoryTotals[item.category] !== undefined) {
+          categoryTotals[item.category] += item.amount;
+        } else {
+          categoryTotals.altro += item.amount;
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${formatDate(item.date)}</td>
+          <td><span class="badge" style="background: ${CATEGORY_COLORS[item.category]}22; color: ${CATEGORY_COLORS[item.category]}; border: 1px solid ${CATEGORY_COLORS[item.category]}55;">${item.category}</span></td>
+          <td>${item.note || "—"}</td>
+          <td><strong>${EUR.format(item.amount)}</strong></td>
+          <td><button class="remove" data-idx="${index}">✕</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      tbody.querySelectorAll(".remove").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const list = readExpenses().sort((a, b) => b.date.localeCompare(a.date));
+          list.splice(Number(btn.dataset.idx), 1);
+          saveExpenses(list);
+          render();
+        });
+      });
+
+      const remaining = salary - totalSpent;
+
+      cardSalary.textContent = EUR.format(salary);
+      cardTotalSpent.textContent = EUR.format(totalSpent);
+      cardRemaining.textContent = EUR.format(remaining);
+
+      if (remaining >= 0) {
+        cardRemainingBox.className = "stat-card good";
+      } else {
+        cardRemainingBox.className = "stat-card bad";
+      }
+
+      updatePieChart(salary, totalSpent, remaining, categoryTotals);
+      renderSubscriptions();
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const history = readHistory();
+      historyTbody.innerHTML = "";
+      emptyHistoryState.hidden = history.length > 0;
+
+      let grandTotalInvested = 0;
+
+      history.forEach((item, index) => {
+        const tr = document.createElement("tr");
+        const remainingStyle = item.remaining >= 0 ? "color: var(--green);" : "color: var(--red);";
+        const investedAmount = item.invested || 0;
+        grandTotalInvested += investedAmount;
+
+        tr.innerHTML = `
+          <td><strong>${item.periodLabel}</strong></td>
+          <td>${EUR.format(item.salary)}</td>
+          <td style="color: var(--yellow);">${EUR.format(item.totalSpent)}</td>
+          <td><strong style="color: var(--green);">${EUR.format(investedAmount)}</strong></td>
+          <td style="${remainingStyle} font-weight: 800;">${EUR.format(item.remaining)}</td>
+          <td>${item.count}</td>
+          <td><button class="remove" data-hidx="${index}">✕</button></td>
+        `;
+        historyTbody.appendChild(tr);
+      });
+
+      totalInvestedAccumulated.textContent = EUR.format(grandTotalInvested);
+
+      historyTbody.querySelectorAll(".remove").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const list = readHistory();
+          list.splice(Number(btn.dataset.hidx), 1);
+          saveHistory(list);
+          renderHistory();
+        });
+      });
+
+      updateLineChart();
+    }
+
+    function updatePieChart(salary, totalSpent, remaining, categoryTotals) {
+      const ctx = document.getElementById("salaryPieChart").getContext("2d");
+
+      const labels = [];
+      const data = [];
+      const bgColors = [];
+
+      Object.keys(categoryTotals).forEach(cat => {
+        if (categoryTotals[cat] > 0) {
+          labels.push(cat.charAt(0).toUpperCase() + cat.slice(1));
+          data.push(categoryTotals[cat]);
+          bgColors.push(CATEGORY_COLORS[cat]);
+        }
+      });
+
+      if (remaining > 0) {
+        labels.push("Risparmi / Rimanente");
+        data.push(remaining);
+        bgColors.push(CATEGORY_COLORS.risparmi);
+      }
+
+      const totalBase = Math.max(salary, totalSpent);
+
+      const chartData = {
+        labels,
+        datasets: [{
+          data,
+          backgroundColor: bgColors,
+          borderWidth: 2,
+          borderColor: "#11182c"
+        }]
+      };
+
+      if (!chart) {
+        chart = new Chart(ctx, {
+          type: "doughnut",
+          data: chartData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: "bottom",
+                labels: { color: "#cbd5e1", usePointStyle: true, padding: 12 }
+              },
+              tooltip: {
+                backgroundColor: "rgba(15,23,42,.95)",
+                borderColor: "rgba(255,255,255,.12)",
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                  label: ctx => {
+                    const val = ctx.raw;
+                    const pct = totalBase > 0 ? (val / totalBase) : 0;
+                    return ` ${ctx.label}: ${EUR.format(val)} (${PERCENT.format(pct)})`;
+                  }
+                }
+              }
+            }
+          }
+        });
+      } else {
+        chart.data = chartData;
+        chart.update();
+      }
+    }
+
+    function updateLineChart() {
+      const history = readHistory().slice().reverse(); // Ordine cronologico
+      const ctx = document.getElementById("historyLineChart");
+      if (!ctx) return;
+
+      const labels = history.map(item => item.periodLabel);
+      const salaryData = history.map(item => item.salary);
+      const spentData = history.map(item => item.totalSpent);
+      const investedData = history.map(item => item.invested || 0);
+      const remainingData = history.map(item => item.remaining);
+
+      const chartData = {
+        labels,
+        datasets: [
+          {
+            label: "Stipendio",
+            data: salaryData,
+            borderColor: "#60a5fa",
+            backgroundColor: "#60a5fa",
+            borderWidth: 2,
+            tension: 0.25,
+            pointRadius: 4
+          },
+          {
+            label: "Totale Uscite",
+            data: spentData,
+            borderColor: "#f59e0b",
+            backgroundColor: "#f59e0b",
+            borderWidth: 2,
+            tension: 0.25,
+            pointRadius: 4
+          },
+          {
+            label: "Investimenti Mensili",
+            data: investedData,
+            borderColor: "#22c55e",
+            backgroundColor: "#22c55e",
+            borderWidth: 2,
+            tension: 0.25,
+            pointRadius: 4
+          },
+          {
+            label: "Risparmi / Rimanente",
+            data: remainingData,
+            borderColor: "#06b6d4",
+            backgroundColor: "#06b6d4",
+            borderWidth: 2,
+            tension: 0.25,
+            pointRadius: 4
+          }
+        ]
+      };
+
+      if (!lineChart) {
+        lineChart = new Chart(ctx, {
+          type: "line",
+          data: chartData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: 'index',
+              intersect: false
+            },
+            scales: {
+              x: {
+                grid: { color: "rgba(255, 255, 255, 0.06)" },
+                ticks: { color: "#94a3b8" }
+              },
+              y: {
+                grid: { color: "rgba(255, 255, 255, 0.08)" },
+                ticks: {
+                  color: "#94a3b8",
+                  callback: value => EUR.format(value)
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                position: "top",
+                labels: { color: "#cbd5e1", usePointStyle: true, padding: 16 }
+              },
+              tooltip: {
+                backgroundColor: "rgba(15,23,42,.95)",
+                borderColor: "rgba(255,255,255,.12)",
+                borderWidth: 1,
+                padding: 10,
+                callbacks: {
+                  label: ctx => ` ${ctx.dataset.label}: ${EUR.format(ctx.raw)}`
+                }
+              }
+            }
+          }
+        });
+      } else {
+        lineChart.data = chartData;
+        lineChart.update();
+      }
+    }
+
+    // EVENTI
+    expenseForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const list = readExpenses();
+      list.push({
+        amount: parseFloat(expAmount.value),
+        date: expDate.value,
+        category: expCategory.value,
+        note: expNote.value.trim()
+      });
+      saveExpenses(list);
+      
+      expAmount.value = "";
+      expNote.value = "";
+      expDate.value = new Date().toISOString().slice(0, 10);
+      render();
+    });
+
+    saveMonthBtn.addEventListener("click", () => {
+      const expenses = readExpenses();
+      const salary = parseFloat(salaryInput.value) || 0;
+      
+      if (expenses.length === 0 && salary === 0) {
+        alert("Inserisci almeno uno stipendio o una spesa/investimento prima di salvare il mese!");
+        return;
+      }
+
+      const now = new Date();
+      const defaultLabel = new Intl.DateTimeFormat("it-IT", { month: "long", year: "numeric" }).format(now);
+      const periodLabel = prompt("Inserisci il nome/periodo del recap:", defaultLabel.charAt(0).toUpperCase() + defaultLabel.slice(1));
+
+      if (!periodLabel) return;
+
+      let totalSpent = 0;
+      let invested = 0;
+
+      expenses.forEach(e => {
+        totalSpent += e.amount;
+        if (e.category === "investimento") {
+          invested += e.amount;
+        }
+      });
+
+      const remaining = salary - totalSpent;
+
+      const history = readHistory();
+      history.unshift({
+        id: Date.now(),
+        periodLabel,
+        salary,
+        totalSpent,
+        invested,
+        remaining,
+        count: expenses.length
+      });
+
+      saveHistory(history);
+
+      if (confirm("Mese salvato nello storico! Vuoi svuotare le spese correnti per iniziare un nuovo mese?")) {
+        saveExpenses([]);
+      }
+
+      render();
+    });
+
+    loadSalary();
+    render();
+  </script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+<!-- simulatorePatrimonio.html -->
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -48,6 +49,10 @@
 
     header {
       margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
     }
 
     .eyebrow {
@@ -74,6 +79,34 @@
       font-size: 15px;
       line-height: 1.6;
     }
+
+    .header-nav {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      color: #08111f;
+      transition: transform .2s ease, filter .2s ease;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+
+    .btn-nav:hover {
+      filter: brightness(1.1);
+      transform: translateY(-2px);
+    }
+
+    .btn-consumi { background: var(--orange); }
+    .btn-obiettivi { background: var(--green); }
 
     .recap-header {
       display: flex;
@@ -194,49 +227,6 @@
       background: rgba(255,255,255,.025);
     }
 
-    .control {
-      margin-bottom: 18px;
-    }
-
-    .control:last-child {
-      margin-bottom: 0;
-    }
-
-    .control-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 14px;
-      margin-bottom: 8px;
-    }
-
-    .control-label {
-      font-size: 13px;
-      font-weight: 700;
-    }
-
-    .control-value {
-      font-size: 13px;
-      font-weight: 800;
-      color: #dbeafe;
-      white-space: nowrap;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      height: 6px;
-      accent-color: var(--accent);
-      cursor: pointer;
-    }
-
-    .range-scale {
-      display: flex;
-      justify-content: space-between;
-      color: #64748b;
-      font-size: 10px;
-      margin-top: 4px;
-    }
-
     .tax-info {
       margin-top: 18px;
       border-top: 1px solid var(--border);
@@ -257,70 +247,6 @@
       border: 1px solid rgba(96,165,250,.17);
       color: #dbeafe;
       font-weight: 800;
-    }
-
-    .pac-schedule {
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-    }
-
-    .pac-schedule-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .pac-schedule-title {
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .05em;
-    }
-
-    .pac-schedule-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .pac-change-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .pac-change-row input {
-      width: 100%;
-      min-width: 0;
-      padding: 7px 8px;
-      color: var(--text);
-      background: #16203a;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font: inherit;
-      font-size: 12px;
-    }
-
-    .pac-change-remove,
-    .pac-change-add {
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 7px 9px;
-      color: var(--text);
-      background: rgba(255,255,255,.05);
-      font: inherit;
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .pac-change-add {
-      color: var(--accent);
-      margin-top: 8px;
     }
 
     .chart-panel {
@@ -347,7 +273,6 @@
       text-align: right;
     }
 
-    /* Layout con Slider Verticale + Grafico */
     .chart-main-layout {
       display: flex;
       align-items: stretch;
@@ -358,32 +283,12 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      gap: 30px;
-      min-width: 120px;
+      gap: 18px;
+      min-width: 130px;
       padding: 18px 0;
     }
 
-    .year-select {
-      width: 100%;
-      padding: 10px 12px;
-      color: var(--text);
-      background: #16203a;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      font: inherit;
-      cursor: pointer;
-      transition: background .2s ease, border-color .2s ease; /* Transizione fluida */
-    }
-
-    /* Effetto quando passi sopra con il mouse o lo selezioni */
-    .year-select:hover, 
-    .year-select:focus {
-      background: #1e293b;             /* Sfondo leggermente più chiaro */
-      border-color: rgba(96, 165, 250, 0.4); /* Bordo che si illumina con il colore d'accento */
-      outline: none;
-    }
-
-    .timeline-cap {
+    .timeline-cap, .timeline-stat, .timeline-current {
       color: var(--muted);
       font-size: 10px;
       font-weight: 800;
@@ -392,25 +297,12 @@
       text-transform: uppercase;
     }
 
-    .timeline-cap strong {
-      display: block;
-      margin-top: 4px;
-      color: var(--text);
-      font-size: 14px;
-      letter-spacing: 0;
-    }
-
     .timeline-stat {
       padding: 10px 0;
       border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
     }
 
-    .timeline-stat strong {
+    .timeline-cap strong, .timeline-stat strong {
       display: block;
       margin-top: 4px;
       color: var(--text);
@@ -421,11 +313,6 @@
     .timeline-current {
       padding-top: 10px;
       border-top: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
     }
 
     .timeline-current strong {
@@ -434,17 +321,6 @@
       color: var(--red);
       font-size: 18px;
       letter-spacing: 0;
-    }
-
-    .timeline-note {
-      padding: 10px;
-      border: 1px solid rgba(96, 165, 250, 0.18);
-      border-radius: 10px;
-      color: var(--accent);
-      font-size: 10px;
-      font-weight: 700;
-      line-height: 1.4;
-      text-align: center;
     }
 
     .year-select-label {
@@ -464,152 +340,19 @@
       border-radius: 10px;
       font: inherit;
       cursor: pointer;
+      transition: background .2s ease, border-color .2s ease;
     }
 
-    /* Layout con Slider Verticale + Grafico */
-    .chart-main-layout {
-      display: flex;
-      align-items: stretch;
-      gap: 20px;
-    }
-
-    .slider-vertical-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      height: auto;
-      align-self: stretch;
-      padding: 16px 10px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      min-width: 72px;
-    }
-
-    .slider-year-label {
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .slider-max-year {
-      position: relative;
-      top: 0;
-    }
-
-    .slider-track-wrap {
-      flex: 1 1 auto;
-      height: auto;
-      min-height: 0;
-      width: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      align-self: center;
-      position: relative;
-      margin: 0;
-      touch-action: none;
-    }
-
-    .slider-track-wrap::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      width: 4px;
-      transform: translateX(-50%);
-      border-radius: 999px;
-      background: #334155;
-    }
-
-    /* Slider verticale con una traccia che occupa tutta la distanza disponibile. */
-    .vertical-range {
-      -webkit-appearance: none;
-      appearance: none;
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 2;
-    }
-
-    .slider-thumb {
-      position: absolute;
-      top: 0;
-      left: 50%;
-      width: 18px;
-      height: 18px;
-      transform: translate(-50%, -50%);
-      border-radius: 50%;
-      background: var(--red);
-      box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
-      pointer-events: none;
-      z-index: 3;
-    }
-
-    .vertical-range::-webkit-slider-runnable-track {
-      background: transparent;
-    }
-
-    .vertical-range::-moz-range-track {
-      background: transparent;
-    }
-
-    .vertical-range::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      background: var(--red);
-      box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
-      cursor: pointer;
-    }
-
-    .vertical-range::-moz-range-thumb {
-      width: 180px;
-      height: 18px;
-      border: none;
-      border-radius: 50%;
-      background: var(--red);
-      box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
-      cursor: pointer;
-    }
-
-    .slider-year-badge {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--red);
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      padding: 4px 8px;
-      border-radius: 8px;
+    .year-select:hover, .year-select:focus {
+      background: #1e293b;
+      border-color: rgba(96, 165, 250, 0.4);
+      outline: none;
     }
 
     .chart-wrap {
       flex: 1;
       position: relative;
       height: 740px;
-    }
-
-    .slider-year-badge {
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--red);
-      background: rgba(239, 68, 68, 0.15);
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      padding: 4px 8px;
-      border-radius: 8px;
-    }
-
-    .chart-wrap {
-      flex: 1;
-      position: relative;
-      height: 740px; /* <--- Bilanciato perfettamente con il container dello slider */
     }
 
     .footnote {
@@ -628,10 +371,11 @@
       border-radius: 10px;
       background: var(--accent);
       color: #08111f;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
       text-decoration: none;
       transition: transform .2s ease, filter .2s ease;
+      text-align: center;
     }
 
     .year-info-link:hover {
@@ -651,12 +395,11 @@
       gap: 12px;
       padding: 9px 10px;
       border: 1px solid var(--border);
-      border-radius: 9px;
+      border-radius: 99px;
       background: rgba(255,255,255,.03);
     }
 
-    .equity-summary span,
-    .equity-summary-note {
+    .equity-summary span, .equity-summary-note {
       color: var(--muted);
       font-size: 11px;
     }
@@ -676,12 +419,10 @@
     }
 
     @media (max-width: 640px) {
+      header { flex-direction: column; gap: 16px; }
       .container { width: min(100% - 18px, 1450px); padding-top: 18px; }
       .cards { grid-template-columns: repeat(1, minmax(0, 1fr)); }
       .chart-main-layout { flex-direction: column; }
-      .slider-vertical-container { height: 260px; width: 100%; flex-direction: column; }
-      .slider-track-wrap { height: auto; width: 48px; }
-      .vertical-range { width: 100%; height: 100%; }
       .chart-wrap { height: 380px; width: 100%; }
       .chart-head { flex-direction: column; align-items: flex-start; }
       .chart-head .hint { text-align: left; }
@@ -692,12 +433,21 @@
 <body>
   <main class="container">
     <header>
-      <div class="eyebrow">Wealth Strategy</div>
-      <h1>Simulatore Patrimoniale · 32 anni</h1>
-      <p class="subtitle">
-        Modifica i parametri e osserva in tempo reale l'evoluzione di BTP, Fondo Emergenze,
-        Fondo Pensione, Motore Azionario e Patrimonio Totale Netto.
-      </p>
+      <div>
+        <div class="eyebrow">Wealth Strategy</div>
+        <h1>Simulatore Patrimoniale · 32 anni</h1>
+        <p class="subtitle">
+          Modifica i parametri e osserva in tempo reale l'evoluzione di BTP, Fondo Emergenze,
+          Fondo Pensione, Motore Azionario e Patrimonio Totale Netto.
+        </p>
+      </div>
+<div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
+  <a href="gestioneStipendio.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #3b82f6; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">💰 Gestione Stipendio</a>
+  
+  <a href="contatoreConsumi.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #f59e0b; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">⚡ Contatore Consumi</a>
+  
+  <a href="calcolatoreObiettivo.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #22c55e; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">🎯 Calcolatore Obiettivi</a>
+</div>
     </header>
 
     <!-- RIEPILOGO: SITUAZIONE ATTUALE -->
@@ -785,7 +535,6 @@
     </section>
 
 
-
     <section class="chart-panel">
       <div class="chart-head">
         <h2>Evoluzione del patrimonio</h2>
@@ -795,7 +544,7 @@
       </div>
 
       <div class="chart-main-layout">
-        <!-- Slider Verticale per l'Anno (Corsa extralunga) -->
+        <!-- Slider Verticale per l'Anno -->
         <div class="year-select-wrap">
           <div class="timeline-cap">
             Orizzonte
@@ -819,7 +568,8 @@
             Obiettivo
             <strong>€1.000.000</strong>
           </div>
-          <a class="year-info-link" href="https://gemini.google.com/app/26bb3ddb99ab8012?hl=it" target="_blank" rel="noopener noreferrer">Informati</a>
+          <a class="year-info-link" href="contatoreConsumi.html">Consumi</a>
+          <a class="year-info-link" href="calcolatoreObiettivo.html">Obiettivi</a>
         </div>
 
         <!-- Grafico -->
@@ -834,7 +584,6 @@
       </div>
     </section>
 
-  </br>
     <section class="section-grid">
       <!-- BTP + Emergency -->
       <div class="control-panel">
@@ -910,6 +659,76 @@
       </div>
     </section>
 
+
+<!-- ========================================== -->
+<!-- SEZIONE: DIARIO & NOTE DI BORDO            -->
+<!-- ========================================== -->
+<section class="panel" style="margin-top: 32px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+    <div>
+      <h2 style="margin: 0;">📖 Diario & Note di Bordo</h2>
+      <span style="color: var(--muted); font-size: 13px;">Annota decisioni di investimento, riflessioni e variazioni di strategia nel tempo.</span>
+    </div>
+  </div>
+
+  <!-- Form inserimento nota -->
+  <form id="diaryForm" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; background: rgba(255,255,255,.02); padding: 16px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 20px;">
+    <label style="display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase;">Data Nota
+      <input id="diaryDate" type="date" required style="width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit;" />
+    </label>
+    <label style="display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase;">Titolo / Argomento
+      <input id="diaryTitle" type="text" placeholder="es. Ricalcolo PAC, Uscita BTP..." required style="width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit;" />
+    </label>
+    <div style="grid-column: span 3;">
+      <label style="display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase;">Contenuto / Riflessione
+        <textarea id="diaryContent" rows="3" placeholder="Scrivi qui i dettagli della tua nota..." required style="width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit; resize: vertical;"></textarea>
+      </label>
+    </div>
+    <div style="grid-column: span 3;">
+      <button type="submit" style="background: var(--accent); color: #08111f; font-weight: 800; border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer;">+ Aggiungi Nota al Diario</button>
+    </div>
+  </form>
+
+  <!-- Lista delle note organizzate per data -->
+  <div id="diaryListContainer" style="display: grid; gap: 12px;"></div>
+  <div id="emptyDiaryState" style="text-align: center; padding: 20px; color: var(--muted);">Nessuna nota registrata nel diario.</div>
+</section>
+
+<!-- ========================================== -->
+<!-- SEZIONE: ZONA PERICOLOSA (RESET TOTALE)    -->
+<!-- ========================================== -->
+
+    <!-- Sezione Reset Totale Protetto da Password -->
+<section class="panel" style="margin-top: 40px; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.03);">
+  <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h2 style="margin: 0; color: #ef4444; font-size: 16px;">⚠️ Zona Pericolosa · Reset Totale</h2>
+      <span style="color: var(--muted); font-size: 12px;">Elimina permanentemente tutti i dati salvati nel browser (stipendi, BTP, PAC, obiettivi e abbonamenti).</span>
+    </div>
+    <button id="resetLocalStorageBtn" style="background: #ef4444; color: #ffffff; border: 0; border-radius: 10px; padding: 10px 16px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer;">
+      🗑️ Cancella Tutti i Dati
+    </button>
+  </div>
+</section>
+
+<script>
+  document.getElementById("resetLocalStorageBtn").addEventListener("click", () => {
+    const password = prompt("⚠️ ATTENZIONE: Stai per eliminare tutti i dati del programma!\nInserisci la password di sicurezza per confermare:");
+    
+    if (password === null) return; // Utente ha annullato
+
+    if (password === "Claudio226971!") {
+      if (confirm("Password corretta. Sei assolutamente sicuro di voler procedere con la cancellazione totale?")) {
+        localStorage.clear();
+        alert("Tutti i dati sono stati eliminati con successo. Il programma verrà ricaricato.");
+        window.location.reload();
+      }
+    } else {
+      alert("❌ Password errata! Operazione annullata.");
+    }
+  });
+</script>
+
   </main>
 
   <script>
@@ -977,7 +796,6 @@
       cardPir: document.getElementById("cardPir"),
       finalPensionTaxLabel: document.getElementById("finalPensionTaxLabel"),
       timelineCurrentYear: document.getElementById("timelineCurrentYear"),
-      explorePacLink: document.getElementById("explorePacLink"),
 
       cardContributed: document.getElementById("cardContributed"),
       cardBtp: document.getElementById("cardBtp"),
@@ -1019,7 +837,6 @@
         els.yearSlider.appendChild(option);
       }
       els.yearSlider.value = CONFIG.currentYear;
-      renderPacSchedule();
     }
 
     function readInputs() {
@@ -1089,9 +906,7 @@
         if (lumpRecords.length > 0) {
           CONFIG.lumpSum = lumpRecords.reduce((total, record) => total + Number(record.amount), 0);
         }
-      } catch {
-        // Mantiene i parametri gia presenti se i record non sono leggibili.
-      }
+      } catch {}
     }
 
     function applyBtpRecordsToInputs() {
@@ -1111,8 +926,6 @@
 
       CONFIG.btpCapital = totalCapital;
       CONFIG.btpReturn = weightedRate;
-      els.btpCapital.max = Math.max(500000, totalCapital);
-      els.btpReturn.max = Math.max(10, weightedRate);
       els.btpCapital.value = totalCapital;
       els.btpReturn.value = weightedRate;
     }
@@ -1135,62 +948,9 @@
         .reduce((amount, change) => change.amount, baseAmount);
     }
 
-    function savePacSchedule() {
-      localStorage.setItem("sim_pacChanges", JSON.stringify(CONFIG.pacChanges));
-      const params = new URLSearchParams({
-        lumpSum: els.lumpSum.value,
-        pacMonthly: els.pacMonthly.value,
-        equityReturn: els.equityReturn.value,
-        pacChanges: JSON.stringify(CONFIG.pacChanges)
-      });
-      if (els.explorePacLink) els.explorePacLink.href = `esploraPAC.html?${params.toString()}`;
-    }
-
-    function renderPacSchedule() {
-      if (!els.pacScheduleList) return;
-      els.pacScheduleList.innerHTML = "";
-
-      CONFIG.pacChanges.forEach((change, index) => {
-        const row = document.createElement("div");
-        row.className = "pac-change-row";
-        row.innerHTML = `
-          <input type="number" min="${CONFIG.timelineStartYear + 1}" max="${CONFIG.timelineStartYear + CONFIG.horizonYears - 1}" value="${change.year}" aria-label="Anno aumento PAC">
-          <input type="number" min="0" max="5000" step="50" value="${change.amount}" aria-label="Nuovo PAC mensile">
-          <button class="pac-change-remove" type="button" aria-label="Rimuovi aumento PAC">Rimuovi</button>
-        `;
-
-        const [yearInput, amountInput] = row.querySelectorAll("input");
-        yearInput.addEventListener("input", () => {
-          change.year = Number(yearInput.value) || CONFIG.timelineStartYear + 1;
-          savePacSchedule();
-          render();
-        });
-        amountInput.addEventListener("input", () => {
-          change.amount = Number(amountInput.value) || 0;
-          savePacSchedule();
-          render();
-        });
-        row.querySelector("button").addEventListener("click", () => {
-          CONFIG.pacChanges.splice(index, 1);
-          savePacSchedule();
-          renderPacSchedule();
-          render();
-        });
-        els.pacScheduleList.appendChild(row);
-      });
-    }
-
     function saveSharedInvestmentInputs() {
       localStorage.setItem("sim_lumpSum", els.lumpSum.value);
       localStorage.setItem("sim_pacMonthly", els.pacMonthly.value);
-
-      const params = new URLSearchParams({
-        lumpSum: els.lumpSum.value,
-        pacMonthly: els.pacMonthly.value,
-        equityReturn: els.equityReturn.value,
-        pacChanges: JSON.stringify(CONFIG.pacChanges)
-      });
-      if (els.explorePacLink) els.explorePacLink.href = `esploraPAC.html?${params.toString()}`;
     }
 
     function formatCurrency(value) {
@@ -1227,43 +987,24 @@
     function simulateBtp(years, startYear, capital, annualReturn) {
       const data = [];
       let value = null;
-
       for (const year of years) {
-        if (startYear === null || year < startYear) {
-          data.push(null);
-          continue;
-        }
-
-        if (value === null) {
-          value = capital;
-        } else {
-          value *= (1 + annualReturn);
-        }
-
+        if (startYear === null || year < startYear) { data.push(null); continue; }
+        if (value === null) value = capital;
+        else value *= (1 + annualReturn);
         data.push(value);
       }
-
       return data;
     }
 
     function simulateBtpRecords(years, records) {
       return years.map(year => {
-        const activeRecords = records.filter(record => {
-          const purchaseYear = new Date(`${record.date}T00:00:00`).getFullYear();
-          return year >= purchaseYear;
-        });
-
+        const activeRecords = records.filter(record => new Date(`${record.date}T00:00:00`).getFullYear() <= year);
         if (activeRecords.length === 0) return null;
-
         return activeRecords.reduce((total, record) => {
-          const purchaseDate = new Date(`${record.date}T00:00:00`);
-          const purchaseYear = purchaseDate.getFullYear();
+          const purchaseYear = new Date(`${record.date}T00:00:00`).getFullYear();
           const frequency = Number(record.frequency) > 0 ? Number(record.frequency) : 6;
           const monthsElapsed = Math.max(0, (year - purchaseYear) * 12);
-          const periods = Math.min(
-            Math.floor(monthsElapsed / frequency),
-            Math.floor((Number(record.duration) * 12) / frequency)
-          );
+          const periods = Math.min(Math.floor(monthsElapsed / frequency), Math.floor((Number(record.duration) * 12) / frequency));
           const periodRate = (Number(record.rate) / 100) * (frequency / 12);
           return total + Number(record.amount) * Math.pow(1 + periodRate, periods);
         }, 0);
@@ -1273,23 +1014,15 @@
     function simulateEmergency(years, startYear, capital, annualReturn, interestCap) {
       const data = [];
       let value = null;
-
       for (const year of years) {
-        if (startYear === null || year < startYear) {
-          data.push(null);
-          continue;
-        }
-
-        if (value === null) {
-          value = capital;
-        } else {
+        if (startYear === null || year < startYear) { data.push(null); continue; }
+        if (value === null) value = capital;
+        else {
           const interestBase = Math.min(value, interestCap);
           value += interestBase * annualReturn;
         }
-
         data.push(value);
       }
-
       return data;
     }
 
@@ -1297,18 +1030,12 @@
       const data = [];
       let value = null;
       let lumpInserted = false;
-
       const monthlyRate = Math.pow(1 + inputs.equityReturn, 1 / 12) - 1;
 
       for (const year of years) {
         const lumpActive = CONFIG.lumpStartYear !== null && year >= CONFIG.lumpStartYear;
         const pacActive = CONFIG.pacStartYear !== null && year >= CONFIG.pacStartYear;
-
-        if (!lumpActive && !pacActive && value === null) {
-          data.push(null);
-          continue;
-        }
-
+        if (!lumpActive && !pacActive && value === null) { data.push(null); continue; }
         if (value === null) value = 0;
 
         if (lumpActive && !lumpInserted) {
@@ -1317,15 +1044,11 @@
         }
 
         for (let month = 0; month < 12; month++) {
-          if (pacActive) {
-            value += getPacMonthlyForYear(year, inputs.pacMonthly);
-          }
+          if (pacActive) value += getPacMonthlyForYear(year, inputs.pacMonthly);
           value *= (1 + monthlyRate);
         }
-
         data.push(value);
       }
-
       return data;
     }
 
@@ -1337,25 +1060,17 @@
       for (const year of years) {
         const lumpActive = CONFIG.lumpStartYear !== null && year >= CONFIG.lumpStartYear;
         const pacActive = CONFIG.pacStartYear !== null && year >= CONFIG.pacStartYear;
-        const anyActive = lumpActive || pacActive;
-
-        if (!anyActive && cumulative === 0) {
-          data.push(null);
-          continue;
-        }
+        if (!lumpActive && !pacActive && cumulative === 0) { data.push(null); continue; }
 
         if (lumpActive && !lumpInserted) {
           cumulative += inputs.lumpSum;
           lumpInserted = true;
         }
-
         if (pacActive) {
           cumulative += getPacMonthlyForYear(year, inputs.pacMonthly) * 12;
         }
-
         data.push(cumulative);
       }
-
       return data;
     }
 
@@ -1370,23 +1085,12 @@
       const inputs = readInputs();
       updateLabels(inputs);
 
-      const years = Array.from(
-        { length: CONFIG.horizonYears },
-        (_, i) => CONFIG.timelineStartYear + i
-      );
-
+      const years = Array.from({ length: CONFIG.horizonYears }, (_, i) => CONFIG.timelineStartYear + i);
       const btp = CONFIG.btpRecords.length > 0
         ? simulateBtpRecords(years, CONFIG.btpRecords)
         : simulateBtp(years, CONFIG.btpStartYear, inputs.btpCapital, inputs.btpReturn);
 
-      const emergency = simulateEmergency(
-        years,
-        CONFIG.emergencyStartYear,
-        inputs.emergencyCapital,
-        inputs.emergencyReturn,
-        CONFIG.interestCapEmergency
-      );
-
+      const emergency = simulateEmergency(years, CONFIG.emergencyStartYear, inputs.emergencyCapital, inputs.emergencyReturn, CONFIG.interestCapEmergency);
       const equityGross = simulateEquity(years, inputs);
       const contributions = cumulativeContributions(years, inputs);
 
@@ -1404,9 +1108,6 @@
         } else {
           const contrib = contributions[i] ?? 0;
           const gain = Math.max(0, gross - contrib);
-
-          const fpTax = getPensionTaxRate(i + 1);
-
           const ordNet = gross - (gain * 0.26);
 
           pensionNetSeries.push(CONFIG.pensionCapital);
@@ -1417,11 +1118,8 @@
         const parts = [btp[i], emergency[i], pensionNetSeries[i], pirNetSeries[i], ordinaryEquityNetSeries[i]];
         const active = parts.some(v => v !== null);
 
-        if (!active) {
-          totalNet.push(null);
-        } else {
-          totalNet.push(parts.reduce((sum, v) => sum + (v ?? 0), 0));
-        }
+        if (!active) totalNet.push(null);
+        else totalNet.push(parts.reduce((sum, v) => sum + (v ?? 0), 0));
       });
 
       const finalBtp = finalOrZero(btp);
@@ -1434,26 +1132,11 @@
       const lastYear = years[years.length - 1];
       const btpInitialCounted = getBtpPrincipalAtYear(lastYear, inputs);
       const emergencyInitialCounted = (CONFIG.emergencyStartYear !== null && CONFIG.emergencyStartYear <= lastYear) ? inputs.emergencyCapital : 0;
-
       const finalContributed = finalOrZero(contributions) + btpInitialCounted + emergencyInitialCounted + CONFIG.pensionCapital + CONFIG.pirCapital;
 
       return {
-        years,
-        btp,
-        emergency,
-        pensionNetSeries,
-        pirNetSeries,
-        ordinaryEquityNetSeries,
-        contributions,
-        totalNet,
-        finalBtp,
-        finalEmergency,
-        finalPension,
-        finalPir,
-        finalEquity,
-        finalTotal,
-        finalContributed,
-        inputs
+        years, btp, emergency, pensionNetSeries, pirNetSeries, ordinaryEquityNetSeries, contributions, totalNet,
+        finalBtp, finalEmergency, finalPension, finalPir, finalEquity, finalTotal, finalContributed, inputs
       };
     }
 
@@ -1467,157 +1150,38 @@
 
     function createOrUpdateChart(sim) {
       const ctx = document.getElementById("wealthChart").getContext("2d");
-
       const pointRadiusTotal = pointRadii(sim.years, CONFIG.currentYear);
       const pointColorTotal = pointColors(sim.years, CONFIG.currentYear, "#22c55e");
 
       const datasets = [
-        {
-          label: "Patrimonio Totale Netto",
-          data: sim.totalNet,
-          borderColor: "#22c55e",
-          backgroundColor: "rgba(34,197,94,.12)",
-          pointRadius: pointRadiusTotal,
-          pointHoverRadius: 8,
-          pointBackgroundColor: pointColorTotal,
-          pointBorderColor: pointColorTotal,
-          borderWidth: 3,
-          tension: 0.28,
-          fill: false,
-          spanGaps: false
-        },
-        {
-          label: "Fondo Pensione",
-          data: sim.pensionNetSeries,
-          borderColor: "#a855f7",
-          pointRadius: 0,
-          borderWidth: 2,
-          borderDash: [6, 6],
-          tension: 0.25,
-          fill: false,
-          spanGaps: false
-        },
-        {
-          label: "Portafoglio PIR",
-          data: sim.pirNetSeries,
-          borderColor: "#60a5fa",
-          pointRadius: 0,
-          borderWidth: 2,
-          borderDash: [5, 5],
-          tension: 0.25,
-          fill: false,
-          spanGaps: false
-        },
-        {
-          label: "Motore Azionario",
-          data: sim.ordinaryEquityNetSeries,
-          borderColor: "#38bdf8",
-          pointRadius: 0,
-          borderWidth: 2,
-          borderDash: [7, 6],
-          tension: 0.25,
-          fill: false,
-          spanGaps: false
-        },
-        {
-          label: "Valore BTP",
-          data: sim.btp,
-          borderColor: "#f59e0b",
-          pointRadius: 0,
-          borderWidth: 2,
-          borderDash: [7, 6],
-          tension: 0.25,
-          fill: false,
-          spanGaps: false
-        },
-        {
-          label: "Fondo Emergenze",
-          data: sim.emergency,
-          borderColor: "#ec4899",
-          pointRadius: 0,
-          borderWidth: 2,
-          borderDash: [7, 6],
-          tension: 0.25,
-          fill: false,
-          spanGaps: false
-        },
-        {
-          label: "Capitale Investito",
-          data: sim.contributions,
-          borderColor: "#64748b",
-          pointRadius: 0,
-          borderWidth: 1.5,
-          tension: 0.15,
-          fill: false,
-          spanGaps: false
-        },
-        {
-          label: "Target",
-          data: sim.years.map(() => CONFIG.target),
-          borderColor: "#94a3b8",
-          pointRadius: 0,
-          borderWidth: 1.5,
-          borderDash: [3, 6],
-          tension: 0,
-          fill: false
-        }
+        { label: "Patrimonio Totale Netto", data: sim.totalNet, borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,.12)", pointRadius: pointRadiusTotal, pointHoverRadius: 8, pointBackgroundColor: pointColorTotal, pointBorderColor: pointColorTotal, borderWidth: 3, tension: 0.28, fill: false },
+        { label: "Fondo Pensione", data: sim.pensionNetSeries, borderColor: "#a855f7", pointRadius: 0, borderWidth: 2, borderDash: [6, 6], tension: 0.25, fill: false },
+        { label: "Portafoglio PIR", data: sim.pirNetSeries, borderColor: "#60a5fa", pointRadius: 0, borderWidth: 2, borderDash: [5, 5], tension: 0.25, fill: false },
+        { label: "Motore Azionario", data: sim.ordinaryEquityNetSeries, borderColor: "#38bdf8", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
+        { label: "Valore BTP", data: sim.btp, borderColor: "#f59e0b", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
+        { label: "Fondo Emergenze", data: sim.emergency, borderColor: "#ec4899", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
+        { label: "Capitale Investito", data: sim.contributions, borderColor: "#64748b", pointRadius: 0, borderWidth: 1.5, tension: 0.15, fill: false },
+        { label: "Target €1.000.000", data: sim.years.map(() => CONFIG.target), borderColor: "#94a3b8", pointRadius: 0, borderWidth: 1.5, borderDash: [3, 6], tension: 0 }
       ];
 
       const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-          intersect: false,
-          mode: "index"
-        },
+        responsive: true, maintainAspectRatio: false,
+        interaction: { intersect: false, mode: "index" },
         plugins: {
-          legend: {
-            position: "bottom",
-            labels: {
-              color: "#cbd5e1",
-              usePointStyle: true,
-              pointStyle: "line",
-              padding: 18
-            }
-          },
+          legend: { position: "bottom", labels: { color: "#cbd5e1", usePointStyle: true, pointStyle: "line", padding: 18 } },
           tooltip: {
-            backgroundColor: "rgba(15,23,42,.96)",
-            titleColor: "#f8fafc",
-            bodyColor: "#cbd5e1",
-            borderColor: "rgba(255,255,255,.12)",
-            borderWidth: 1,
-            padding: 12,
-            callbacks: {
-              label: function(context) {
-                const value = context.raw;
-                return `${context.dataset.label}: ${value == null ? "—" : formatCurrency(value)}`;
-              }
-            }
+            backgroundColor: "rgba(15,23,42,.96)", titleColor: "#f8fafc", bodyColor: "#cbd5e1", borderColor: "rgba(255,255,255,.12)", borderWidth: 1, padding: 12,
+            callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw == null ? "—" : formatCurrency(ctx.raw)}` }
           }
         },
         scales: {
-          x: {
-            grid: { color: "rgba(148,163,184,.07)" },
-            ticks: { color: "#94a3b8" },
-            title: { display: true, text: "Anno", color: "#64748b" }
-          },
-          y: {
-            beginAtZero: true,
-            grid: { color: "rgba(148,163,184,.09)" },
-            ticks: {
-              color: "#94a3b8",
-              callback: value => formatCurrency(value)
-            }
-          }
+          x: { grid: { color: "rgba(148,163,184,.07)" }, ticks: { color: "#94a3b8" } },
+          y: { beginAtZero: true, grid: { color: "rgba(148,163,184,.09)" }, ticks: { color: "#94a3b8", callback: value => formatCurrency(value) } }
         }
       };
 
       if (!chart) {
-        chart = new Chart(ctx, {
-          type: "line",
-          data: { labels: sim.years, datasets },
-          options
-        });
+        chart = new Chart(ctx, { type: "line", data: { labels: sim.years, datasets }, options });
       } else {
         chart.data.labels = sim.years;
         chart.data.datasets = datasets;
@@ -1636,7 +1200,6 @@
       els.cardTotal.textContent = formatCurrency(sim.finalTotal);
 
       els.currentYearLabel.textContent = CONFIG.currentYear;
-      
       const currIndex = sim.years.indexOf(CONFIG.currentYear);
       if (currIndex !== -1) {
         const currBtp = sim.btp[currIndex] ?? 0;
@@ -1671,50 +1234,9 @@
       render();
     });
 
-    [
-      els.btpCapital,
-      els.btpReturn,
-      els.emergencyCapital,
-      els.emergencyReturn,
-      els.lumpSum,
-      els.pacMonthly,
-      els.equityReturn,
-      els.pirShare,
-      els.pensionShare
-    ].forEach(input => input.addEventListener("input", () => {
-      saveSharedInvestmentInputs();
-      render();
-    }));
-
-    const savedPacChanges = localStorage.getItem("sim_pacChanges");
-    if (savedPacChanges) {
-      try {
-        CONFIG.pacChanges = JSON.parse(savedPacChanges).filter(change => Number.isFinite(Number(change.year)) && Number.isFinite(Number(change.amount)));
-      } catch {
-        CONFIG.pacChanges = [];
-      }
-    }
-
     CONFIG.btpRecords = readBtpRecords();
     setDefaultValues();
-    const sharedLumpSum = localStorage.getItem("sim_lumpSum");
-    const sharedPacMonthly = localStorage.getItem("sim_pacMonthly");
-    const sharedEquityReturn = localStorage.getItem("sim_equityReturn");
-    if (sharedLumpSum !== null) {
-      CONFIG.lumpSum = Number(sharedLumpSum);
-      els.lumpSum.value = CONFIG.lumpSum;
-    }
-    if (sharedPacMonthly !== null) {
-      CONFIG.pacMonthly = Number(sharedPacMonthly);
-      els.pacMonthly.value = CONFIG.pacMonthly;
-    }
-    if (sharedEquityReturn !== null) {
-      CONFIG.equityReturn = Number(sharedEquityReturn);
-      els.equityReturn.value = CONFIG.equityReturn;
-    }
     applyPacRecordsToConfig();
-    els.lumpSum.value = CONFIG.lumpSum;
-    els.pacMonthly.value = CONFIG.pacMonthly;
     applyEmergencyFundToInputs();
     applyPensionFundToConfig();
     applyPirSettingsToConfig();
@@ -1722,6 +1244,151 @@
     saveSharedInvestmentInputs();
     render();
 
+// --- LOGICA DIARIO & NOTE DI BORDO ---
+  const DIARY_KEY = "sim_investment_diary";
+  const diaryForm = document.getElementById("diaryForm");
+  const diaryDate = document.getElementById("diaryDate");
+  const diaryTitle = document.getElementById("diaryTitle");
+  const diaryContent = document.getElementById("diaryContent");
+  const diaryListContainer = document.getElementById("diaryListContainer");
+  const emptyDiaryState = document.getElementById("emptyDiaryState");
+
+  if (diaryDate) {
+    diaryDate.value = new Date().toISOString().slice(0, 10);
+  }
+
+  function readDiary() {
+    try { return JSON.parse(localStorage.getItem(DIARY_KEY) || "[]"); }
+    catch { return []; }
+  }
+
+  function saveDiary(data) {
+    localStorage.setItem(DIARY_KEY, JSON.stringify(data));
+  }
+
+  function formatDiaryDate(str) {
+    return new Intl.DateTimeFormat("it-IT", { day: '2-digit', month: 'long', year: 'numeric' }).format(new Date(`${str}T00:00:00`));
+  }
+
+  function renderDiary() {
+    if (!diaryListContainer) return;
+    const diary = readDiary().sort((a, b) => b.date.localeCompare(a.date));
+    diaryListContainer.innerHTML = "";
+    if (emptyDiaryState) {
+      emptyDiaryState.hidden = diary.length > 0;
+    }
+
+    diary.forEach((item, index) => {
+      const card = document.createElement("div");
+      card.style.cssText = "background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; padding: 16px; position: relative;";
+      
+      card.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+          <div>
+            <span style="font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: .05em;">${formatDiaryDate(item.date)}</span>
+            <h3 style="margin: 4px 0 0; font-size: 16px; color: var(--text);">${item.title}</h3>
+          </div>
+          <button class="remove-diary" data-dindex="${index}" style="background: rgba(239,68,68,.16); border: 1px solid rgba(239,68,68,.35); color: var(--text); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 12px;">✕</button>
+        </div>
+        <p style="margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; white-space: pre-wrap;">${item.content}</p>
+      `;
+      diaryListContainer.appendChild(card);
+    });
+
+    diaryListContainer.querySelectorAll(".remove-diary").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const list = readDiary().sort((a, b) => b.date.localeCompare(a.date));
+        list.splice(Number(btn.dataset.dindex), 1);
+        saveDiary(list);
+        renderDiary();
+      });
+    });
+  }
+
+  if (diaryForm) {
+    diaryForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const diary = readDiary();
+      diary.push({
+        id: Date.now(),
+        date: diaryDate.value,
+        title: diaryTitle.value.trim(),
+        content: diaryContent.value.trim()
+      });
+      saveDiary(diary);
+      
+      diaryTitle.value = "";
+      diaryContent.value = "";
+      diaryDate.value = new Date().toISOString().slice(0, 10);
+      renderDiary();
+    });
+  }
+
+  renderDiary();
+
   </script>
+
+  <!-- OVERLAY SCHERMATA DI BENVENUTO E ACCESSO -->
+<div id="authOverlay" style="position: fixed; inset: 0; z-index: 99999; background: rgba(11, 16, 32, 0.85); backdrop-filter: blur(16px); display: flex; align-items: center; justify-content: center; padding: 16px;">
+  <div style="background: rgba(17, 24, 44, 0.95); border: 1px solid var(--border); border-radius: 20px; box-shadow: var(--shadow); width: min(420px, 100%); padding: 32px; text-align: center;">
+    
+    <div style="font-size: 12px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: .12em; margin-bottom: 8px;">Wealth Strategy · Accesso Sicuro</div>
+    <h2 id="authGreeting" style="margin: 0 0 8px; font-size: 26px; color: var(--text);">Benvenuto Claudio</h2>
+    <p id="authDateTime" style="margin: 0 0 24px; color: var(--muted); font-size: 13px;"></p>
+
+    <form id="authForm" style="display: grid; gap: 14px;">
+      <label style="display: grid; gap: 6px; text-align: left; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase;">Password di Sblocco
+        <input id="authPassword" type="password" placeholder="Inserisci password..." required style="width: 100%; padding: 12px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; font: inherit; font-size: 15px;" />
+      </label>
+      <button type="submit" style="background: var(--accent); color: #08111f; border: 0; border-radius: 10px; padding: 12px; font: inherit; font-size: 14px; font-weight: 800; cursor: pointer; transition: filter .2s;">
+        🔓 Accedi alla Dashboard
+      </button>
+      <div id="authError" style="color: #ef4444; font-size: 12px; min-height: 18px; font-weight: 700;"></div>
+    </form>
+
+  </div>
+</div>
+
+<script>
+  // --- LOGICA SCHERMATA DI BENVENUTO & AUTENTICAZIONE (SESSIONE) ---
+  const authOverlay = document.getElementById("authOverlay");
+  const authForm = document.getElementById("authForm");
+  const authPassword = document.getElementById("authPassword");
+  const authError = document.getElementById("authError");
+  const authDateTime = document.getElementById("authDateTime");
+
+  // Verifica se l'utente ha già fatto l'accesso in questa sessione del browser
+  if (sessionStorage.getItem("sim_authenticated") === "true") {
+    authOverlay.style.display = "none";
+  } else {
+    // Mostra data e ora correnti formattate in italiano solo se deve fare il login
+    const now = new Date();
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    const dateFormatted = now.toLocaleDateString('it-IT', options);
+    const timeFormatted = now.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    authDateTime.textContent = `${dateFormatted} — Ore ${timeFormatted}`;
+  }
+
+  authForm.addEventListener("submit", e => {
+    e.preventDefault();
+    const pwd = authPassword.value;
+
+    if (pwd === "Claudio226971!") {
+      // Salva lo stato di autenticazione per l'intera sessione della scheda
+      sessionStorage.setItem("sim_authenticated", "true");
+
+      // Effetto dissolvenza in uscita dell'overlay
+      authOverlay.style.transition = "opacity 0.4s ease";
+      authOverlay.style.opacity = "0";
+      setTimeout(() => {
+        authOverlay.style.display = "none";
+      }, 400);
+    } else {
+      authError.textContent = "❌ Password errata. Riprova.";
+      authPassword.value = "";
+      authPassword.focus();
+    }
+  });
+</script>
 </body>
 </html>

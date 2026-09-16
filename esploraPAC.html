@@ -385,7 +385,7 @@
         </p>
       </div>
       <div>
-        <a href="simulatorePatrimonio.html" class="btn-link">← Torna al Simulatore</a>
+        <a href="simulatorePatrimonio.html" class="btn-link">Torna alla Dashboard</a>
       </div>
     </header>
 
@@ -547,9 +547,7 @@
     function readPacRecords() {
       try {
         const saved = JSON.parse(localStorage.getItem("sim_pacRecords") || "[]");
-        const cleaned = Array.isArray(saved) ? saved.filter(record => record.source !== "transfer") : [];
-        localStorage.setItem("sim_pacRecords", JSON.stringify(cleaned));
-        return cleaned;
+        return Array.isArray(saved) ? saved : [];
       } catch {
         return [];
       }
@@ -616,8 +614,9 @@
 
       pacRecords.forEach((record, index) => {
         const row = document.createElement("tr");
+        const typeLabel = record.type === "monthly" ? "PAC mensile" : (record.source === "transfer" ? "Una tantum (da BTP)" : "Una tantum");
         row.innerHTML = `
-          <td>${record.type === "monthly" ? "PAC mensile" : "Una tantum"}</td>
+          <td>${typeLabel}</td>
           <td>${formatRecordDate(record.date)}</td>
           <td>${EUR.format(record.amount)}${record.type === "monthly" ? "/mese" : ""}</td>
           <td><button class="remove" type="button" data-pac-index="${index}">Elimina</button></td>
@@ -669,10 +668,10 @@
         .reduce((amount, change) => Number(change.amount), savedPacMonthly);
     }
 
-    // Calcolo dinamico dei versamenti in base alla data corrente del sistema (es. Settembre 2026)
+    // Calcolo dinamico dei versamenti in base alla data corrente del sistema
     function calculatePaymentsAndDeposits() {
       const startDate = new Date(startDateStr);
-      const currentDate = new Date(); // Data odierna del sistema
+      const currentDate = new Date();
 
       let monthsElapsed = (currentDate.getFullYear() - startDate.getFullYear()) * 12 + (currentDate.getMonth() - startDate.getMonth());
       if (currentDate.getDate() >= startDate.getDate() && monthsElapsed < 0) {
@@ -680,7 +679,6 @@
       }
       const paymentsCount = Math.max(0, monthsElapsed);
 
-      // Deposito totale = Capitale Iniziale (Una tantum) + (PAC Mensile * numero di mesi trascorsi)
       let scheduledDeposits = 0;
       for (let paymentIndex = 0; paymentIndex < paymentsCount; paymentIndex += 1) {
         const paymentDate = new Date(startDate);
@@ -909,7 +907,7 @@
     renderSatelliteTable();
     initSatelliteChart();
     renderPacRecords();
-
   </script>
+
 </body>
 </html>

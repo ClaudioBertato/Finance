@@ -47,7 +47,7 @@
         <h1>Fondo Pensione</h1>
         <p class="subtitle">Inserisci il capitale attuale del fondo. Il simulatore userà esclusivamente questo valore.</p>
       </div>
-      <a class="back-link" href="simulatorePatrimonio.html">Torna al simulatore</a>
+      <a class="back-link" href="simulatorePatrimonio.html">Torna alla Dashboard</a>
     </header>
 
     <section class="panel">
@@ -57,21 +57,21 @@
       <div class="status" id="status" aria-live="polite"></div>
     </section>
   </main>
+<script>
+  const STORAGE_KEY = "sim_pensionFund";
+  const amountInput = document.getElementById("pensionAmount");
+  const status = document.getElementById("status");
 
-  <script>
-    const STORAGE_KEY = "sim_pensionFund";
-    const amountInput = document.getElementById("pensionAmount");
-    const status = document.getElementById("status");
-    amountInput.value = Number(localStorage.getItem(STORAGE_KEY) || 0);
+  amountInput.value = Number(localStorage.getItem(STORAGE_KEY) || 0);
 
-    function savePensionFund() {
-      const amount = Math.max(0, Number(amountInput.value) || 0);
-      localStorage.setItem(STORAGE_KEY, String(amount));
-      status.textContent = "Valore salvato automaticamente.";
-    }
+  function savePensionFund() {
+    const amount = Math.max(0, Number(amountInput.value) || 0);
+    localStorage.setItem(STORAGE_KEY, String(amount));
+    status.textContent = "Valore salvato automaticamente.";
+  }
 
-    amountInput.addEventListener("input", savePensionFund);
-    savePensionFund();
-  </script>
+  amountInput.addEventListener("input", savePensionFund);
+  savePensionFund();
+</script>
 </body>
 </html>

@@ -1,0 +1,392 @@
+<!-- calcolatoreObiettivo.html -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calcolatore Obiettivi & Target Retrostante</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #11182c;
+      --panel-2: #16203a;
+      --border: rgba(255,255,255,.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --purple: #a855f7;
+      --cyan: #38bdf8;
+      --shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 15% 10%, rgba(96,165,250,.13), transparent 28%), var(--bg);
+      color: var(--text);
+    }
+
+    .container { width: min(1250px, calc(100% - 32px)); margin: 0 auto; padding: 32px 0 48px; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 24px; }
+    .eyebrow { color: var(--accent); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 8px 0 0; font-size: clamp(30px, 4vw, 46px); line-height: 1.05; }
+    .subtitle { max-width: 720px; margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.6; }
+
+    .panel { padding: 22px; background: rgba(17,24,44,.84); border: 1px solid var(--border); border-radius: 18px; box-shadow: var(--shadow); backdrop-filter: blur(14px); margin-bottom: 20px; }
+    .panel h2 { margin: 0 0 16px; font-size: 18px; }
+
+    .grid { display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; }
+
+    form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .full-width { grid-column: span 2; }
+    label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    input, select { width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit; }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+
+    .btn { border: 0; border-radius: 10px; padding: 10px 16px; font: inherit; font-size: 13px; font-weight: 800; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+    .btn-primary { background: var(--accent); color: #08111f; }
+    .btn-success { background: var(--green); color: #08111f; }
+    .btn-warning { background: var(--yellow); color: #08111f; }
+    .remove { padding: 5px 8px; color: var(--text); background: rgba(239,68,68,.16); border: 1px solid rgba(239,68,68,.35); border-radius: 6px; cursor: pointer; }
+
+    .table-wrap { margin-top: 14px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
+    th { color: var(--muted); font-size: 11px; text-transform: uppercase; }
+
+    .progress-bar-bg { width: 100%; height: 8px; background: rgba(255,255,255,.08); border-radius: 99px; overflow: hidden; margin-top: 6px; }
+    .progress-bar-fill { height: 100%; background: var(--green); border-radius: 99px; transition: width 0.3s ease; }
+
+    .target-box {
+      background: linear-gradient(135deg, rgba(34,197,94,.08), rgba(96,165,250,.08));
+      border: 1px solid rgba(34,197,94,.25);
+      border-radius: 14px;
+      padding: 18px;
+      margin-top: 16px;
+    }
+
+    .target-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .target-card {
+      background: rgba(17,24,44,.6);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .target-card span { display: block; color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+    .target-card strong { display: block; margin-top: 4px; font-size: 18px; color: var(--text); }
+
+    @media (max-width: 900px) {
+      .grid, .target-metrics { grid-template-columns: 1fr; }
+      header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <header>
+      <div>
+        <div class="eyebrow">Gestione Casa · Obiettivi di Risparmio</div>
+        <h1>Calcolatore Obiettivi & Pianificazione Retrostante</h1>
+        <p class="subtitle">Definisci i tuoi traguardi finanziari. Il sistema calcola esattamente la quota mensile da accantonare (con o senza rendimento da investimento) per raggiungere l'obiettivo in tempo.</p>
+      </div>
+
+      <!-- NAVIGAZIONE -->
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
+        <a href="gestioneStipendio.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #3b82f6; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">💰 Gestione Stipendio</a>
+        <a href="contatoreConsumi.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #f59e0b; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">⚡ Contatore Consumi</a>
+        <a href="calcolatoreObiettivo.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #22c55e; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">🎯 Calcolatore Obiettivi</a>
+        <a href="simulatorePatrimonio.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #94a3b8; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">← Simulatore</a>
+      </div>
+    </header>
+
+    <div class="grid">
+      <!-- FORM CREAZIONE OBIETTIVO -->
+      <section class="panel">
+        <h2>Crea Nuovo Obiettivo</h2>
+        <form id="goalForm">
+          <label class="full-width">Nome Obiettivo
+            <input id="goalName" type="text" placeholder="es. Fondo Emergenze, Anticipo Casa, Auto Nuova..." required />
+          </label>
+          <label>Cifra Obiettivo (€ Target)
+            <input id="goalTarget" type="number" step="0.01" min="1" placeholder="es. 10000" required />
+          </label>
+          <label>Capitale Iniziale (€)
+            <input id="goalCurrent" type="number" step="0.01" min="0" placeholder="es. 1500" value="0" />
+          </label>
+          <label class="full-width">Data Scadenza Target
+            <input id="goalDate" type="date" required />
+          </label>
+          <div class="full-width">
+            <button class="btn btn-primary" type="submit" style="width: 100%;">🎯 Salva Obiettivo</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- SELEZIONE & DEPOSITO MANUALE -->
+      <section class="panel">
+        <h2>Aggiungi Deposito ad Obiettivo</h2>
+        <form id="depositForm">
+          <label class="full-width">Seleziona Obiettivo
+            <select id="depositGoalSelect" required></select>
+          </label>
+          <label>Importo Versamento (€)
+            <input id="depositAmount" type="number" step="0.01" min="0.01" placeholder="es. 200" required />
+          </label>
+          <label>Data Versamento
+            <input id="depositDate" type="date" required />
+          </label>
+          <div class="full-width">
+            <button class="btn btn-success" type="submit" style="width: 100%;">➕ Registra Versamento</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <!-- SEZIONE TABELLA OBIETTIVI -->
+    <section class="panel">
+      <h2>I Tuoi Obiettivi di Risparmio</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Obiettivo</th>
+              <th>Data Scadenza</th>
+              <th>Versato / Target</th>
+              <th>Mancante</th>
+              <th>Avanzamento</th>
+              <th>Dettaglio & Target</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="goalsTableBody"></tbody>
+        </table>
+        <div id="emptyGoalsState" style="text-align: center; padding: 20px; color: var(--muted);">Nessun obiettivo inserito. Compila il modulo sopra per iniziare.</div>
+      </div>
+    </section>
+
+    <!-- SEZIONE CALCOLATORE INVERSO (TARGET RETROSTANTE) -->
+    <section class="panel" id="targetSection" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h2 style="margin: 0;">📉 Calcolatore Inverso per Obiettivo: <span id="selectedGoalTitle" style="color: var(--accent);">—</span></h2>
+          <span style="color: var(--muted); font-size: 13px;">Pianificazione retrostante per calcolare la quota mensile esatta da versare.</span>
+        </div>
+        <button id="quickDepositBtn" class="btn btn-warning">⚡ Applica Quota Mensile Suggerita</button>
+      </div>
+
+      <div class="target-box">
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+          <label style="flex: 1; min-width: 200px;">Ipotizza Rendimento Annuo Netto (% per PAC/BTP):
+            <input id="expectedReturnInput" type="number" step="0.1" min="0" max="20" value="4.0" placeholder="es. 4.0" />
+          </label>
+          <div style="font-size: 12px; color: var(--muted); max-width: 450px;">
+            Inserisci un rendimento annuo stimato per vedere come l'interesse composto riduce la rata mensile rispetto al risparmio puro senza rendimento.
+          </div>
+        </div>
+
+        <div class="target-metrics">
+          <div class="target-card">
+            <span>Mesi Rimanenti</span>
+            <strong id="targetMonthsLeft">0 mesi</strong>
+          </div>
+          <div class="target-card">
+            <span>Quota Mensile (Risparmio Puro)</span>
+            <strong id="targetMonthlyPure" style="color: var(--yellow);">€ 0,00 / m</strong>
+          </div>
+          <div class="target-card">
+            <span>Quota Mensile (Con Rendimento)</span>
+            <strong id="targetMonthlyInvested" style="color: var(--green);">€ 0,00 / m</strong>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const GOALS_KEY = "sim_goals_list";
+    const EUR = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" });
+
+    const goalForm = document.getElementById("goalForm");
+    const depositForm = document.getElementById("depositForm");
+    const depositGoalSelect = document.getElementById("depositGoalSelect");
+    const depositDate = document.getElementById("depositDate");
+    const goalsTableBody = document.getElementById("goalsTableBody");
+    const emptyGoalsState = document.getElementById("emptyGoalsState");
+
+    const targetSection = document.getElementById("targetSection");
+    const selectedGoalTitle = document.getElementById("selectedGoalTitle");
+    const expectedReturnInput = document.getElementById("expectedReturnInput");
+    const targetMonthsLeft = document.getElementById("targetMonthsLeft");
+    const targetMonthlyPure = document.getElementById("targetMonthlyPure");
+    const targetMonthlyInvested = document.getElementById("targetMonthlyInvested");
+    const quickDepositBtn = document.getElementById("quickDepositBtn");
+
+    let activeGoalId = null;
+
+    depositDate.value = new Date().toISOString().slice(0, 10);
+
+    function readGoals() {
+      try { return JSON.parse(localStorage.getItem(GOALS_KEY) || "[]"); }
+      catch { return []; }
+    }
+
+    function saveGoals(data) {
+      localStorage.setItem(GOALS_KEY, JSON.stringify(data));
+    }
+
+    function formatDate(str) {
+      return new Intl.DateTimeFormat("it-IT").format(new Date(`${str}T00:00:00`));
+    }
+
+    function calculateMonthsLeft(targetDateStr) {
+      const now = new Date();
+      const target = new Date(`${targetDateStr}T00:00:00`);
+      const yearsDiff = target.getFullYear() - now.getFullYear();
+      const monthsDiff = target.getMonth() - now.getMonth();
+      const totalMonths = (yearsDiff * 12) + monthsDiff;
+      return Math.max(1, totalMonths);
+    }
+
+    // Formula della Rata Costante per il PMT Inverso con Interesse Composto
+    function calculatePMT(ratePerPeriod, numberOfPeriods, futureValue) {
+      if (ratePerPeriod === 0) return futureValue / numberOfPeriods;
+      return (futureValue * ratePerPeriod) / (Math.pow(1 + ratePerPeriod, numberOfPeriods) - 1);
+    }
+
+    function renderTargetCalculator() {
+      const goals = readGoals();
+      const goal = goals.find(g => g.id === activeGoalId);
+
+      if (!goal) {
+        targetSection.style.display = "none";
+        return;
+      }
+
+      targetSection.style.display = "block";
+      selectedGoalTitle.textContent = goal.name;
+
+      const remainingCapital = Math.max(0, goal.targetAmount - goal.currentAmount);
+      const monthsLeft = calculateMonthsLeft(goal.targetDate);
+      const annualReturnPct = parseFloat(expectedReturnInput.value) || 0;
+      const monthlyRate = annualReturnPct / 100 / 12;
+
+      const monthlyPure = remainingCapital / monthsLeft;
+      const monthlyInvested = calculatePMT(monthlyRate, monthsLeft, remainingCapital);
+
+      targetMonthsLeft.textContent = `${monthsLeft} mesi`;
+      targetMonthlyPure.textContent = `${EUR.format(monthlyPure)} / m`;
+      targetMonthlyInvested.textContent = `${EUR.format(monthlyInvested)} / m`;
+
+      quickDepositBtn.onclick = () => {
+        document.getElementById("depositGoalSelect").value = goal.id;
+        document.getElementById("depositAmount").value = Math.round(monthlyInvested);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      };
+    }
+
+    function render() {
+      const goals = readGoals();
+      goalsTableBody.innerHTML = "";
+      depositGoalSelect.innerHTML = "";
+      emptyGoalsState.hidden = goals.length > 0;
+
+      if (goals.length > 0 && !activeGoalId) {
+        activeGoalId = goals[0].id;
+      }
+
+      goals.forEach(goal => {
+        const pct = Math.min(100, (goal.currentAmount / goal.targetAmount) * 100);
+        const remaining = Math.max(0, goal.targetAmount - goal.currentAmount);
+
+        // Popola tendina depositi
+        const opt = document.createElement("option");
+        opt.value = goal.id;
+        opt.textContent = `${goal.name} (mancano ${EUR.format(remaining)})`;
+        depositGoalSelect.appendChild(opt);
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td><strong>${goal.name}</strong></td>
+          <td>${formatDate(goal.targetDate)}</td>
+          <td>${EUR.format(goal.currentAmount)} / ${EUR.format(goal.targetAmount)}</td>
+          <td style="color: var(--yellow);"><strong>${EUR.format(remaining)}</strong></td>
+          <td>
+            <strong>${pct.toFixed(1)}%</strong>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${pct}%;"></div></div>
+          </td>
+          <td>
+            <button class="btn btn-primary" style="padding: 4px 10px; font-size: 11px;" onclick="selectGoal('${goal.id}')">📊 Analisi Target</button>
+          </td>
+          <td><button class="remove" onclick="removeGoal('${goal.id}')">✕</button></td>
+        `;
+        goalsTableBody.appendChild(tr);
+      });
+
+      renderTargetCalculator();
+    }
+
+    window.selectGoal = function(id) {
+      activeGoalId = id;
+      renderTargetCalculator();
+    };
+
+    window.removeGoal = function(id) {
+      let goals = readGoals().filter(g => g.id !== id);
+      saveGoals(goals);
+      if (activeGoalId === id) activeGoalId = null;
+      render();
+    };
+
+    goalForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const goals = readGoals();
+      const newGoal = {
+        id: "goal_" + Date.now(),
+        name: document.getElementById("goalName").value.trim(),
+        targetAmount: parseFloat(document.getElementById("goalTarget").value),
+        currentAmount: parseFloat(document.getElementById("goalCurrent").value) || 0,
+        targetDate: document.getElementById("goalDate").value
+      };
+      goals.push(newGoal);
+      saveGoals(goals);
+      activeGoalId = newGoal.id;
+      goalForm.reset();
+      render();
+    });
+
+    depositForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const goalId = depositGoalSelect.value;
+      const amount = parseFloat(document.getElementById("depositAmount").value);
+      
+      const goals = readGoals();
+      const goal = goals.find(g => g.id === goalId);
+      if (goal) {
+        goal.currentAmount += amount;
+        saveGoals(goals);
+        depositForm.reset();
+        depositDate.value = new Date().toISOString().slice(0, 10);
+        render();
+      }
+    });
+
+    expectedReturnInput.addEventListener("input", renderTargetCalculator);
+
+    render();
+  </script>
+</body>
+</html>
