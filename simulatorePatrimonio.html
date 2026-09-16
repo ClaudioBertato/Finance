@@ -363,6 +363,26 @@
       padding: 18px 0;
     }
 
+    .year-select {
+      width: 100%;
+      padding: 10px 12px;
+      color: var(--text);
+      background: #16203a;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font: inherit;
+      cursor: pointer;
+      transition: background .2s ease, border-color .2s ease; /* Transizione fluida */
+    }
+
+    /* Effetto quando passi sopra con il mouse o lo selezioni */
+    .year-select:hover, 
+    .year-select:focus {
+      background: #1e293b;             /* Sfondo leggermente più chiaro */
+      border-color: rgba(96, 165, 250, 0.4); /* Bordo che si illumina con il colore d'accento */
+      outline: none;
+    }
+
     .timeline-cap {
       color: var(--muted);
       font-size: 10px;
@@ -764,6 +784,57 @@
       </div>
     </section>
 
+
+
+    <section class="chart-panel">
+      <div class="chart-head">
+        <h2>Evoluzione del patrimonio</h2>
+        <div class="hint">
+          Usa lo slider a sinistra per cambiare l'anno selezionato. Target fisso a €1.000.000.
+        </div>
+      </div>
+
+      <div class="chart-main-layout">
+        <!-- Slider Verticale per l'Anno (Corsa extralunga) -->
+        <div class="year-select-wrap">
+          <div class="timeline-cap">
+            Orizzonte
+            <strong id="timelineHorizonLabel">2026 - 2057</strong>
+          </div>
+          <div class="timeline-stat">
+            Durata
+            <strong>32 anni</strong>
+          </div>
+          <div class="timeline-stat">
+            Composizione
+            <strong>5 pilastri</strong>
+          </div>
+          <label class="year-select-label" for="yearSlider">Anno</label>
+          <select id="yearSlider" class="year-select" aria-label="Seleziona anno"></select>
+          <div class="timeline-current">
+            Anno selezionato
+            <strong id="timelineCurrentYear">2026</strong>
+          </div>
+          <div class="timeline-stat">
+            Obiettivo
+            <strong>€1.000.000</strong>
+          </div>
+          <a class="year-info-link" href="https://gemini.google.com/app/26bb3ddb99ab8012?hl=it" target="_blank" rel="noopener noreferrer">Informati</a>
+        </div>
+
+        <!-- Grafico -->
+        <div class="chart-wrap">
+          <canvas id="wealthChart"></canvas>
+        </div>
+      </div>
+
+      <div class="footnote">
+        Simulazione matematica: non considera costi gestionali, inflazione o volatilità di mercato.
+        Le aliquote fiscali sono calcolate sulle plusvalenze maturate nei rispettivi regimi.
+      </div>
+    </section>
+
+  </br>
     <section class="section-grid">
       <!-- BTP + Emergency -->
       <div class="control-panel">
@@ -836,54 +907,6 @@
             Aliquota FP a scadenza: <span id="finalPensionTaxLabel">15,00%</span>
           </div>
         </div>
-      </div>
-    </section>
-
-    <section class="chart-panel">
-      <div class="chart-head">
-        <h2>Evoluzione del patrimonio</h2>
-        <div class="hint">
-          Usa lo slider a sinistra per cambiare l'anno selezionato. Target fisso a €1.000.000.
-        </div>
-      </div>
-
-      <div class="chart-main-layout">
-        <!-- Slider Verticale per l'Anno (Corsa extralunga) -->
-        <div class="year-select-wrap">
-          <div class="timeline-cap">
-            Orizzonte
-            <strong id="timelineHorizonLabel">2026 - 2057</strong>
-          </div>
-          <div class="timeline-stat">
-            Durata
-            <strong>32 anni</strong>
-          </div>
-          <div class="timeline-stat">
-            Composizione
-            <strong>5 pilastri</strong>
-          </div>
-          <label class="year-select-label" for="yearSlider">Anno</label>
-          <select id="yearSlider" class="year-select" aria-label="Seleziona anno"></select>
-          <div class="timeline-current">
-            Anno selezionato
-            <strong id="timelineCurrentYear">2026</strong>
-          </div>
-          <div class="timeline-stat">
-            Obiettivo
-            <strong>€1.000.000</strong>
-          </div>
-          <a class="year-info-link" href="https://gemini.google.com/app/26bb3ddb99ab8012?hl=it" target="_blank" rel="noopener noreferrer">Informati</a>
-        </div>
-
-        <!-- Grafico -->
-        <div class="chart-wrap">
-          <canvas id="wealthChart"></canvas>
-        </div>
-      </div>
-
-      <div class="footnote">
-        Simulazione matematica: non considera costi gestionali, inflazione o volatilità di mercato.
-        Le aliquote fiscali sono calcolate sulle plusvalenze maturate nei rispettivi regimi.
       </div>
     </section>
 
@@ -1529,7 +1552,7 @@
           spanGaps: false
         },
         {
-          label: "Target €1.000.000",
+          label: "Target",
           data: sim.years.map(() => CONFIG.target),
           borderColor: "#94a3b8",
           pointRadius: 0,
