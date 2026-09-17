@@ -1,0 +1,16 @@
+{
+  "_app": "Wealth Strategy Simulator",
+  "_versioneBackup": 1,
+  "_dataEsportazione": "2026-09-17T12:18:02.777Z",
+  "dati": {
+    "sim_pacMonthly": "350",
+    "sim_emergencyFund": "1000",
+    "sim_pirData": "[{\"name\":\"XXXXXXX\",\"percent\":25,\"returnRate\":0,\"color\":\"#3b82f6\"},{\"name\":\"XXXXXXX\",\"percent\":25,\"returnRate\":0,\"color\":\"#ef4444\"},{\"name\":\"XXXXXXX\",\"percent\":25,\"returnRate\":0,\"color\":\"#f59e0b\"},{\"name\":\"XXXXXXX\",\"percent\":25,\"returnRate\":0,\"color\":\"#22c55e\"}]",
+    "sim_portfolioData": "[{\"name\":\"iShares Core MSCI World\",\"percent\":35,\"returnRate\":20,\"color\":\"#3b82f6\"},{\"name\":\"Amundi MSCI EM Asia\",\"percent\":25,\"returnRate\":6.8,\"color\":\"#ef4444\"},{\"name\":\"iShares Core S&P 500\",\"percent\":30,\"returnRate\":8,\"color\":\"#f59e0b\"},{\"name\":\"iShares Physical Gold\",\"percent\":10,\"returnRate\":4.5,\"color\":\"#22c55e\"}]",
+    "sim_pacRecords": "[{\"type\":\"lump\",\"date\":\"2026-09-25\",\"amount\":10000},{\"type\":\"monthly\",\"date\":\"2026-09-25\",\"amount\":350},{\"type\":\"monthly\",\"date\":\"2028-09-25\",\"amount\":450},{\"type\":\"monthly\",\"date\":\"2030-09-25\",\"amount\":750}]",
+    "sim_satelliteData": "[{\"name\":\"iShares NASDAQ-100\",\"percent\":45,\"returnRate\":10,\"color\":\"#38bdf8\"},{\"name\":\"Xtrackers CSI 300 Tech\",\"percent\":30,\"returnRate\":8,\"color\":\"#a855f7\"},{\"name\":\"iShares Global Clean Energy\",\"percent\":25,\"returnRate\":6,\"color\":\"#22c55e\"}]",
+    "sim_equityReturn": "10.76",
+    "sim_btpRecords": "[{\"id\":\"btp_1789624814475\",\"date\":\"2026-09-25\",\"amount\":40000,\"duration\":12,\"rate\":2.65,\"frequency\":6},{\"id\":\"btp_1789624857866\",\"date\":\"2026-09-25\",\"amount\":30000,\"duration\":6,\"rate\":2.85,\"frequency\":3},{\"id\":\"btp_1789625047823\",\"date\":\"2032-09-25\",\"amount\":30000,\"duration\":6,\"rate\":2.85,\"frequency\":3},{\"id\":\"btp_1789625077494\",\"date\":\"2038-09-25\",\"amount\":30000,\"duration\":6,\"rate\":2.85,\"frequency\":3},{\"id\":\"btp_1789625169813\",\"date\":\"2038-09-25\",\"amount\":40000,\"duration\":12,\"rate\":2.85,\"frequency\":6},{\"id\":\"btp_1789625103358\",\"date\":\"2044-09-25\",\"amount\":30000,\"duration\":6,\"rate\":2.85,\"frequency\":3},{\"id\":\"btp_1789625134982\",\"date\":\"2050-09-25\",\"amount\":30000,\"duration\":6,\"rate\":2.85,\"frequency\":3},{\"id\":\"btp_1789625207725\",\"date\":\"2050-09-25\",\"amount\":40000,\"duration\":12,\"rate\":2.45,\"frequency\":6}]",
+    "sim_lumpSum": "10000"
+  }
+}
