@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mutuo vs Affitto · Wealth Strategy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #08111f;
+      --card: #111c30;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --success: #22c55e;
+      --accent: #f59e0b;
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 350px 1fr;
+      gap: 24px;
+    }
+    @media(max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 15px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      background: #08111f;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      color: #fff;
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .results-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+    .results-row span:last-child {
+      font-weight: 700;
+    }
+    .chart-container {
+      position: relative;
+      height: 400px;
+      width: 100%;
+      margin-top: 10px;
+    }
+    .back-link, button { border: 0; border-radius: 10px; padding: 10px 14px; color: #08111f; background: var(--accent); font: inherit; font-size: 13px; font-weight: 800; text-decoration: none; cursor: pointer; }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: #60a5fa;
+      color: var(#000000);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      white-space: nowrap; /* <-- AGGIUNGI QUESTA RIGA */
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>🏠 Simulatore Mutuo vs Affitto</h1>
+      <div style="font-size: 12px; color: var(--muted);">Confronto patrimoniale a lungo termine tra acquisto immobiliare e affitto + PAC azionario</div>
+    </div>
+    <a href="simulatorePatrimonio.html" class="back-link">Torna alla Dashboard</a>
+  </header>
+
+  <div class="grid">
+    <!-- PARAMETRI DI INPUT -->
+    <div class="card">
+      <h3>Parametri Simulazione</h3>
+      
+      <div class="form-group">
+        <label>Valore Immobile (€)</label>
+        <input type="number" id="valoreImmobile" value="200000" step="5000" oninput="eseguiSimulazione()">
+      </div>
+
+      <div class="form-group">
+        <label>Anticipo / Caparra Iniziale (€)</label>
+        <input type="number" id="anticipo" value="40000" step="1000" oninput="eseguiSimulazione()">
+      </div>
+
+      <div class="form-group">
+        <label>Durata Mutuo (Anni)</label>
+        <input type="number" id="anniMutuo" value="30" step="5" min="5" max="40" oninput="eseguiSimulazione()">
+      </div>
+
+      <div class="form-group">
+        <label>Tasso Annuo Mutuo (%)</label>
+        <input type="number" id="tassoMutuo" value="3.5" step="0.1" oninput="eseguiSimulazione()">
+      </div>
+
+      <div class="form-group">
+        <label>Affitto Mensile Alternativo (€)</label>
+        <input type="number" id="affittoMensile" value="750" step="50" oninput="eseguiSimulazione()">
+      </div>
+
+      <div class="form-group">
+        <label>Rendimento Annuo PAC Azionario (%)</label>
+        <input type="number" id="rendimentoPac" value="7.5" step="0.5" oninput="eseguiSimulazione()">
+      </div>
+
+      <div class="form-group">
+        <label>Rivalutazione Immobile Annua (%)</label>
+        <input type="number" id="rivalutazioneCasa" value="1.0" step="0.2" oninput="eseguiSimulazione()">
+      </div>
+    </div>
+
+    <!-- RISULTATI E GRAFICO -->
+    <div style="display: flex; flex-direction: column; gap: 24px;">
+      <div class="card">
+        <h3>Sintesi Finanziaria (A fine periodo)</h3>
+        <div class="results-row">
+          <span style="color: var(--muted);">Rata Mensile Mutuo:</span>
+          <span id="resRataMensile" style="color: var(--accent);">—</span>
+        </div>
+        <div class="results-row">
+          <span style="color: var(--muted);">Interessi Totali Banche:</span>
+          <span id="resInteressiTotali" style="color: #ef4444;">—</span>
+        </div>
+        <div class="results-row">
+          <span style="color: var(--muted);">Patrimonio Netto Scenario Mutuo (Casa):</span>
+          <span id="resPatrimonioCasa" style="color: var(--primary);">—</span>
+        </div>
+        <div class="results-row" style="border-bottom: 0;">
+          <span style="color: var(--muted);">Patrimonio Netto Scenario Affitto + PAC:</span>
+          <span id="resPatrimonioAffitto" style="color: var(--success);">—</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Evoluzione del Patrimonio a Confronto</h3>
+        <div class="chart-container">
+          <canvas id="mutuoChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let chartInstance = null;
+
+  function formatCurrency(val) {
+    return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(val);
+  }
+
+  function eseguiSimulazione() {
+    const valoreImmobileIniziale = parseFloat(document.getElementById('valoreImmobile').value) || 0;
+    const anticipo = parseFloat(document.getElementById('anticipo').value) || 0;
+    const anni = parseInt(document.getElementById('anniMutuo').value) || 30;
+    const tassoAnnuo = parseFloat(document.getElementById('tassoMutuo').value) || 0;
+    const affittoIniziale = parseFloat(document.getElementById('affittoMensile').value) || 0;
+    const rendimentoPac = (parseFloat(document.getElementById('rendimentoPac').value) || 0) / 100;
+    const rivalutazioneCasa = (parseFloat(document.getElementById('rivalutazioneCasa').value) || 0) / 100;
+
+    const capitaleMutuo = Math.max(0, valoreImmobileIniziale - anticipo);
+    const numRate = anni * 12;
+    const tassoMensile = (tassoAnnuo / 100) / 12;
+
+    // Calcolo rata mutuo (francese)
+    let rataMensile = 0;
+    if (tassoMensile > 0) {
+      rataMensile = capitaleMutuo * (tassoMensile * Math.pow(1 + tassoMensile, numRate)) / (Math.pow(1 + tassoMensile, numRate) - 1);
+    } else {
+      rataMensile = capitaleMutuo / numRate;
+    }
+
+    document.getElementById('resRataMensile').textContent = formatCurrency(rataMensile);
+
+    let labels = [];
+    let patrimonioMutuoSeries = [];
+    let patrimonioAffittoSeries = [];
+
+    // Scenario Affitto + PAC: parte con l'anticipo investito interamente in azionario
+    let capitaleInvestitoAffitto = anticipo;
+    let debitoResiduo = capitaleMutuo;
+    let interessiTotaliBanca = 0;
+    let valoreCasaCorrente = valoreImmobileIniziale;
+    let affittoCorrente = affittoIniziale;
+
+    for (let anno = 0; anno <= anni; anno++) {
+      labels.push(`Anno ${anno}`);
+
+      if (anno === 0) {
+        patrimonioMutuoSeries.push(anticipo); // All'anno 0 hai la casa del valore dell'anticipo
+        patrimonioAffittoSeries.push(anticipo);
+        continue;
+      }
+
+      // 1. Anno Mutuo & Casa
+      let interessiAnno = 0;
+      let capitaleRimborsatoAnno = 0;
+      for (let m = 1; m <= 12; m++) {
+        if (debitoResiduo > 0) {
+          let interesseMese = debitoResiduo * tassoMensile;
+          let quotaCapitaleMese = rataMensile - interesseMese;
+          interessiAnno += interesseMese;
+          capitaleRimborsatoAnno += quotaCapitaleMese;
+          debitoResiduo -= quotaCapitaleMese;
+          if (debitoResiduo < 0) debitoResiduo = 0;
+        }
+      }
+      interessiTotaliBanca += interessiAnno;
+      valoreCasaCorrente *= (1 + rivalutazioneCasa);
+      
+      // Patrimonio Casa = Valore immobile attuale - Debito residuo con la banca
+      let patrimonioCasaNetto = valoreCasaCorrente - debitoResiduo;
+      patrimonioMutuoSeries.push(Math.round(patrimonioCasaNetto));
+
+      // 2. Anno Affitto + PAC
+      // Ogni mese nel scenario affitto: investi il capitale e aggiungi la differenza se la rata mutuo è maggiore dell'affitto (o viceversa)
+      for (let m = 1; m <= 12; m++) {
+        let risparmioMensileVersoPac = rataMensile - affittoCorrente; // Se il mutuo costa più dell'affitto, in affitto risparmi e investi la diff.
+        capitaleInvestitoAffitto = (capitaleInvestitoAffitto + risparmioMensileVersoPac) * (1 + (rendimentoPac / 12));
+      }
+      patrimonioAffittoSeries.push(Math.round(capitaleInvestitoAffitto));
+
+      // Aumento inflazione affitto stimato all'1.5% annuo
+      affittoCorrente *= 1.015;
+    }
+
+    document.getElementById('resInteressiTotali').textContent = formatCurrency(interessiTotaliBanca);
+    document.getElementById('resPatrimonioCasa').textContent = formatCurrency(patrimonioMutuoSeries[patrimonioMutuoSeries.length - 1]);
+    document.getElementById('resPatrimonioAffitto').textContent = formatCurrency(patrimonioAffittoSeries[patrimonioAffittoSeries.length - 1]);
+
+    disegnaGrafico(labels, patrimonioMutuoSeries, patrimonioAffittoSeries);
+  }
+
+  function disegnaGrafico(labels, dataMutuo, dataAffitto) {
+    const ctx = document.getElementById('mutuoChart').getContext('2d');
+    
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
+
+    chartInstance = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          {
+            label: "Patrimonio Netto Mutuo (Immobile)",
+            data: dataMutuo,
+            borderColor: "#3b82f6",
+            backgroundColor: "rgba(59,130,246,0.1)",
+            borderWidth: 3,
+            fill: true,
+            tension: 0.2
+          },
+          {
+            label: "Patrimonio Netto Affitto + PAC",
+            data: dataAffitto,
+            borderColor: "#22c55e",
+            backgroundColor: "rgba(34,197,94,0.1)",
+            borderWidth: 3,
+            fill: true,
+            tension: 0.2
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { family: 'Inter' } } },
+          tooltip: {
+            callbacks: {
+              label: ctx => `${ctx.dataset.label}: ${formatCurrency(ctx.raw)}`
+            }
+          }
+        },
+        scales: {
+          x: { grid: { color: "rgba(148,163,184,0.07)" }, ticks: { color: "#94a3b8" } },
+          y: { 
+            grid: { color: "rgba(148,163,184,0.09)" }, 
+            ticks: { 
+              color: "#94a3b8",
+              callback: value => formatCurrency(value)
+            } 
+          }
+        }
+      }
+    });
+  }
+
+  // Esegui il calcolo iniziale all'apertura della pagina
+  window.onload = eseguiSimulazione;
+</script>
+
+</body>
+</html>

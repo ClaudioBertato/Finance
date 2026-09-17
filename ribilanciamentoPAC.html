@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping List Ribilanciamento PAC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: #11182c;
+      --panel-2: #16203a;
+      --border: rgba(255, 255, 255, 0.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --success: #22c55e;
+      --accent: #60a5fa;
+    }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 20px 0 40px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .card {
+      background: rgba(17,24,44,.84);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.28);
+      margin-bottom: 20px;
+    }
+    .card h3 {
+      margin-top: 0;
+      font-size: 14px;
+      font-weight: 700;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .form-group {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    input {
+      width: 100%;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 10px;
+      color: #fff;
+      font-size: 13px;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    th {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: rgba(255,255,255,.02);
+    }
+    .back-link { 
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent);
+      color: #08111f;
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      transition: filter .2s;
+    }
+    .back-link:hover { filter: brightness(1.1); }
+    .etf-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 14px;
+    }
+    .badge-macro {
+      background: rgba(59, 130, 246, 0.15);
+      color: #93c5fd;
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-size: 11px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <div>
+      <h1>🛒 Shopping List Ribilanciamento PAC</h1>
+      <div style="font-size: 12px; color: var(--muted); margin-top: 4px;">Sincronizzato automaticamente con i dati di Esplora PAC</div>
+    </div>
+    <a href="esploraPAC.html" class="back-link">Torna a Esplora PAC</a>
+  </header>
+
+  <!-- BUDGET MENSILE -->
+  <div class="card">
+    <h3>💰 Budget da Investire Questo Mese</h3>
+    <div class="form-group" style="margin-bottom: 0;">
+      <label>Capitale totale disponibile sul PAC (€)</label>
+      <input type="number" id="budgetMensile" value="700" step="50" oninput="calcolaShoppingList()" style="width: 250px;">
+    </div>
+  </div>
+
+  <!-- INPUT VALORI ATTUALI DEGLI ETF -->
+  <div class="card">
+    <h3>📊 Valore Attuale dei singoli ETF</h3>
+    <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">
+      I pesi percentuali e le macro-aree (Core 75% / Satellite 25%) vengono letti direttamente dalle impostazioni di Esplora PAC. Inserisci qui il capitale attuale investito in ciascuno strumento e il prezzo di mercato della quota.
+    </div>
+    <div id="containerComponenti"></div>
+  </div>
+
+  <!-- SHOPPING LIST FINALE -->
+  <div class="card" style="border-color: rgba(34, 197, 94, 0.3);">
+    <h3>📋 La Tua Shopping List Operativa</h3>
+    <div style="font-size: 13px; color: var(--muted); margin-bottom: 10px;" id="sintesiBudget">—</div>
+    
+<table>
+      <thead>
+      <tr>
+        <th>Strumento / ETF</th>
+        <th>Macro-Pilastro</th>
+        <th>Peso sul Totale</th>
+        <th>Da Investire (€)</th>
+        <th>Spartizione Ideale (€)</th>
+        <th>Quote da Acquistare</th>
+      </tr>
+      </thead>
+      <tbody id="shoppingTableBody"></tbody>
+</table>
+
+<script>
+  // Dati di fallback predefiniti basati esattamente su esploraPAC.html
+  const defaultCore = [
+    { name: "iShares Core MSCI World", percent: 35.0, returnRate: 7.5, color: "#3b82f6" },
+    { name: "Amundi MSCI EM Asia", percent: 25.0, returnRate: 6.8, color: "#ef4444" },
+    { name: "iShares Core S&P 500", percent: 30.0, returnRate: 8.0, color: "#f59e0b" },
+    { name: "iShares Physical Gold", percent: 10.0, returnRate: 4.5, color: "#22c55e" }
+  ];
+
+  const defaultSatellite = [
+    { name: "iShares NASDAQ-100", percent: 45.0, returnRate: 10.0, color: "#38bdf8" },
+    { name: "Xtrackers CSI 300 Tech", percent: 30.0, returnRate: 8.0, color: "#a855f7" },
+    { name: "iShares Global Clean Energy", percent: 25.0, returnRate: 6.0, color: "#22c55e" }
+  ];
+
+  const CORE_SHARE = 0.75;      // 75%
+  const SATELLITE_SHARE = 0.25; // 25%
+
+  function getCoreData() {
+    try {
+      const saved = localStorage.getItem("sim_portfolioData");
+      return saved ? JSON.parse(saved) : defaultCore;
+    } catch { return defaultCore; }
+  }
+
+  function getSatelliteData() {
+    try {
+      const saved = localStorage.getItem("sim_satelliteData");
+      return saved ? JSON.parse(saved) : defaultSatellite;
+    } catch { return defaultSatellite; }
+  }
+
+  function formatCurrency(val) {
+    return new Intl.NumberFormat('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(val);
+  }
+
+  function inizializzaPagina() {
+    const coreList = getCoreData();
+    const satList = getSatelliteData();
+    const container = document.getElementById('containerComponenti');
+    container.innerHTML = '';
+
+    // Sezione Core
+    let coreBox = document.createElement('div');
+    coreBox.className = 'etf-box';
+    let coreHtml = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+        <strong style="color: var(--text); font-size: 14px;">Portafoglio Core</strong>
+        <span class="badge-macro">Peso Macro: 75%</span>
+      </div>
+      <div style="display: grid; gap: 10px;">
+    `;
+    coreList.forEach((item, idx) => {
+      coreHtml += buildInputRow('core', idx, item.name, item.percent);
+    });
+    coreHtml += `</div>`;
+    coreBox.innerHTML = coreHtml;
+    container.appendChild(coreBox);
+
+    // Sezione Satellite
+    let satBox = document.createElement('div');
+    satBox.className = 'etf-box';
+    let satHtml = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom: 8px;">
+        <strong style="color: var(--text); font-size: 14px;">Portafoglio Satellite</strong>
+        <span class="badge-macro" style="background: rgba(168,85,247,0.15); color: #d8b4fe;">Peso Macro: 25%</span>
+      </div>
+      <div style="display: grid; gap: 10px;">
+    `;
+    satList.forEach((item, idx) => {
+      satHtml += buildInputRow('satellite', idx, item.name, item.percent);
+    });
+    satHtml += `</div>`;
+    satBox.innerHTML = satHtml;
+    container.appendChild(satBox);
+
+    calcolaShoppingList();
+  }
+
+  function buildInputRow(type, idx, name, pesoRelativo) {
+    // Recupera valori salvati in precedenza se esistono
+    const savedValore = localStorage.getItem(`input_val_${type}_${idx}`) || "1000";
+    const savedPrezzo = localStorage.getItem(`input_prz_${type}_${idx}`) || "100";
+
+    return `
+      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; align-items: center; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 8px;">
+        <div>
+          <div style="font-weight: 700; font-size: 13px;">${name}</div>
+          <div style="font-size: 11px; color: var(--muted);">Peso nel pilastro: ${pesoRelativo}%</div>
+        </div>
+        <div>
+          <label>Valore Attuale (€)</label>
+          <input type="number" class="valore-input" data-type="${type}" data-index="${idx}" value="${savedValore}" oninput="salvaE_Ricalcola()">
+        </div>
+        <div>
+          <label>Prezzo Quota (€)</label>
+          <input type="number" class="prezzo-input" data-type="${type}" data-index="${idx}" value="${savedPrezzo}" step="0.01" oninput="salvaE_Ricalcola()">
+        </div>
+        <div style="font-size: 11px; color: var(--success); font-weight: 700; text-align: right; padding-top: 14px;">
+          Attivo
+        </div>
+      </div>
+    `;
+  }
+
+  function salvaE_Ricalcola() {
+    document.querySelectorAll('.valore-input, .prezzo-input').forEach(input => {
+      const type = input.getAttribute('data-type');
+      const idx = input.getAttribute('data-index');
+      if (input.classList.contains('valore-input')) {
+        localStorage.setItem(`input_val_${type}_${idx}`, input.value);
+      } else {
+        localStorage.setItem(`input_prz_${type}_${idx}`, input.value);
+      }
+    });
+    calcolaShoppingList();
+  }
+
+  function calcolaShoppingList() {
+    const budget = parseFloat(document.getElementById('budgetMensile').value) || 0;
+    const coreList = getCoreData();
+    const satList = getSatelliteData();
+
+    let elementi = [];
+    let totValoreAttuale = 0;
+
+    // Elaborazione Core (pesa 75% sul totale generale)
+    coreList.forEach((item, idx) => {
+      const valoreAttuale = parseFloat(localStorage.getItem(`input_val_core_${idx}`)) || 1000;
+      const prezzo = parseFloat(localStorage.getItem(`input_prz_core_${idx}`)) || 100;
+      const pesoSulTotale = item.percent * CORE_SHARE;
+
+      totValoreAttuale += valoreAttuale;
+      elementi.push({
+        nome: item.name,
+        macro: "Core (75%)",
+        pesoTotale: pesoSulTotale,
+        valoreAttuale: valoreAttuale,
+        prezzo: prezzo > 0 ? prezzo : 1
+      });
+    });
+
+    // Elaborazione Satellite (pesa 25% sul totale generale)
+    satList.forEach((item, idx) => {
+      const valoreAttuale = parseFloat(localStorage.getItem(`input_val_satellite_${idx}`)) || 1000;
+      const prezzo = parseFloat(localStorage.getItem(`input_prz_satellite_${idx}`)) || 100;
+      const pesoSulTotale = item.percent * SATELLITE_SHARE;
+
+      totValoreAttuale += valoreAttuale;
+      elementi.push({
+        nome: item.name,
+        macro: "Satellite (25%)",
+        pesoTotale: pesoSulTotale,
+        valoreAttuale: valoreAttuale,
+        prezzo: prezzo > 0 ? prezzo : 1
+      });
+    });
+
+    let totValoreFuturo = totValoreAttuale + budget;
+    document.getElementById('sintesiBudget').textContent = `Capitale complessivo attuale: ${formatCurrency(totValoreAttuale)} | Capitale stimato post-versamento: ${formatCurrency(totValoreFuturo)}`;
+
+    let sommaDeficit = 0;
+    elementi.forEach(el => {
+      let valoreIdealeFuturo = totValoreFuturo * (el.pesoTotale / 100);
+      let deficit = valoreIdealeFuturo - el.valoreAttuale;
+      el.deficit = deficit > 0 ? deficit : 0;
+      sommaDeficit += el.deficit;
+    });
+
+    if (sommaDeficit <= 0) {
+      sommaDeficit = budget;
+    }
+
+    let htmlTable = '';
+    elementi.forEach(el => {
+      // 1. Quota di ribilanciamento intelligente
+      let proporzione = (sommaDeficit > 0) ? (el.deficit / sommaDeficit) : (el.pesoTotale / 100);
+      let soldiDaInvestire = budget * proporzione;
+      if (soldiDaInvestire < 0) soldiDaInvestire = 0;
+
+      // 2. Spartizione ideale pura basata unicamente sulla percentuale fissa del budget
+      let spartizioneIdeale = budget * (el.pesoTotale / 100);
+
+      let numQuote = soldiDaInvestire / el.prezzo;
+
+      htmlTable += `
+        <tr>
+          <td><strong>${el.nome}</strong></td>
+          <td><span class="badge-macro">${el.macro}</span></td>
+          <td><strong>${el.pesoTotale.toFixed(2).replace('.', ',')}%</strong></td>
+          <td><strong style="color: var(--success);">${formatCurrency(soldiDaInvestire)}</strong></td>
+          <td><span style="color: var(--accent);">${formatCurrency(spartizioneIdeale)}</span></td>
+          <td><strong>${numQuote.toFixed(2)}</strong> quote <span style="color:var(--muted); font-size:11px;">(@ ${formatCurrency(el.prezzo)})</span></td>
+        </tr>
+      `;
+    });
+
+    document.getElementById('shoppingTableBody').innerHTML = htmlTable;
+  }
+
+  window.onload = inizializzaPagina;
+</script>
+
+</body>
+</html>

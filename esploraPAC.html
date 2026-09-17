@@ -31,8 +31,7 @@
     body {
       margin: 35px 0;
       min-height: 100vh;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       background:
         radial-gradient(circle at 15% 10%, rgba(96,165,250,.13), transparent 28%),
         radial-gradient(circle at 85% 15%, rgba(34,197,94,.10), transparent 24%),
@@ -119,11 +118,7 @@
       margin-bottom: 20px;
     }
 
-    .panel-title h2 {
-      margin: 0;
-      font-size: 18px;
-      letter-spacing: -.01em;
-    }
+    .panel-title h2 { margin: 0; font-size: 18px; }
 
     .panel-title span {
       font-size: 11px;
@@ -134,9 +129,7 @@
       background: rgba(255,255,255,.025);
     }
 
-    .table-container {
-      overflow-x: auto;
-    }
+    .table-container { overflow-x: auto; }
 
     table {
       width: 100%;
@@ -145,10 +138,7 @@
       font-size: 13px;
     }
 
-    th, td {
-      padding: 12px 14px;
-      border-bottom: 1px solid var(--border);
-    }
+    th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); }
 
     th {
       color: var(--muted);
@@ -159,18 +149,19 @@
       background: rgba(255,255,255,.02);
     }
 
-    th:last-child,
-    td:last-child {
-      text-align: center;
+    th:last-child, td:last-child { text-align: center; }
+
+    .asset-name { font-weight: 700; color: #e2e8f0; }
+
+    td a {
+      color: #f8fafc;
+      text-decoration: none;
+      transition: color 0.2s ease;
     }
 
-    tbody tr:hover {
-      background: rgba(255,255,255,.015);
-    }
-
-    .asset-name {
-      font-weight: 700;
-      color: #e2e8f0;
+    td a:hover {
+      color: #38bdf8;
+      text-decoration: underline;
     }
 
     .table-input {
@@ -185,10 +176,7 @@
       text-align: right;
     }
 
-    .table-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
+    .table-input:focus { outline: none; border-color: var(--accent); }
 
     tfoot td {
       font-weight: 800;
@@ -233,143 +221,18 @@
       color: var(--text);
     }
 
-    .pac-plan {
-      margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px solid var(--border);
-    }
-
-    .pac-plan-title {
-      margin-bottom: 8px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-    }
-
-    .pac-plan-list {
-      display: grid;
-      gap: 6px;
-      color: var(--text);
-      font-size: 12px;
-    }
-
-    .pac-plan-row {
-      display: flex;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 7px 9px;
-      border-radius: 8px;
-      background: rgba(255,255,255,.03);
-    }
-
-    .allocation-summary {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-top: 10px;
-    }
-
-    .allocation-summary div {
-      padding: 9px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .allocation-summary strong {
-      display: block;
-      margin-top: 3px;
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    .equity-config {
-      margin-bottom: 24px;
-    }
-
-    .equity-config-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
-
-    .equity-config label {
-      display: grid;
-      gap: 6px;
-      color: var(--muted);
-      font-size: 11px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: .04em;
-    }
-
-    .equity-config input {
-      width: 100%;
-      padding: 10px;
-      color: var(--text);
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 9px;
-      font: inherit;
-    }
-
-    .equity-config input:focus { outline: none; border-color: var(--accent); }
-
-    .equity-config-note {
-      margin: 12px 0 0;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .equity-config .pac-schedule-list { margin-top: 12px; }
-
-    .equity-config .pac-change-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
-      gap: 8px;
-    }
-
-    .equity-config .pac-change-row input {
-      width: 100%;
-      padding: 8px;
-      color: var(--text);
-      background: var(--panel-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      font: inherit;
-    }
-
-    .equity-config button {
-      margin-top: 10px;
-      padding: 8px 10px;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--accent);
-      background: rgba(255,255,255,.05);
-      font: inherit;
-      font-size: 11px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
     .pac-records { margin-bottom: 24px; }
     .pac-record-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     .pac-record-card { padding: 16px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; }
     .pac-record-card h3 { margin: 0 0 12px; font-size: 15px; }
     .pac-record-card form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
-    .pac-record-card label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+    .pac-record-card label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
     .pac-record-card input { width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit; }
-    .pac-record-table { margin-top: 16px; }
 
     @media (max-width: 1024px) {
       .section-grid { grid-template-columns: 1fr; }
       header { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .deposit-info-box { grid-template-columns: 1fr; }
-      .equity-config-grid { grid-template-columns: 1fr; }
-      .pac-record-grid { grid-template-columns: 1fr; }
+      .deposit-info-box, .pac-record-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -385,6 +248,24 @@
         </p>
       </div>
       <div>
+        <a href="ribilanciamentoPAC.html" style="
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: #ffffff;
+  text-decoration: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+" onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-1px)';" onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)';">
+  🛒 Shopping List Ribilanciamento
+</a>
         <a href="simulatorePatrimonio.html" class="btn-link">Torna alla Dashboard</a>
       </div>
     </header>
@@ -419,7 +300,6 @@
     </section>
 
     <div class="section-grid">
-      <!-- Pannello Tabella Composizione -->
       <div class="panel">
         <div class="panel-title">
           <h2>Portafoglio Core</h2>
@@ -437,9 +317,7 @@
                 <th>Stima Teorica 12 Mesi</th>
               </tr>
             </thead>
-            <tbody id="tableBody">
-              <!-- Generato via JavaScript -->
-            </tbody>
+            <tbody id="tableBody"></tbody>
             <tfoot>
               <tr>
                 <td>TOTALE</td>
@@ -476,7 +354,6 @@
         </div>
       </div>
 
-      <!-- Pannello Grafico a Torta -->
       <div class="panel">
         <div class="panel-title">
           <h2>Ripartizione Pesi</h2>
@@ -530,6 +407,9 @@
         </div>
       </div>
     </div>
+
+
+    
   </main>
 
   <script>
@@ -537,7 +417,17 @@
     const CORE_SHARE = 0.75;
     const SATELLITE_SHARE = 0.25;
 
-    // Recupera i valori salvati o impostati nel simulatore principale (tramite localStorage o default)
+    // Mappatura dei link ufficiali JustETF per ciascun ETF
+    const etfLinks = {
+        "iShares Core MSCI World": "https://www.justetf.com/it/etf-profile.html?isin=IE00B4L5Y983",
+        "Amundi MSCI EM Asia": "https://www.justetf.com/it/etf-profile.html?isin=LU1781541849",
+        "iShares Core S&P 500": "https://www.justetf.com/it/etf-profile.html?isin=IE0031442068",
+        "iShares Physical Gold": "https://www.justetf.com/it/etf-profile.html?isin=IE00B4ND3602",
+        "iShares NASDAQ-100": "https://www.justetf.com/it/etf-profile.html?isin=IE00B53SZB19",
+        "Xtrackers CSI 300 Tech": "https://www.justetf.com/it/etf-profile.html?isin=LU0779800910",
+        "iShares Global Clean Energy": "https://www.justetf.com/it/etf-profile.html?isin=IE000U58J0M1"
+    };
+
     let pacRecords = readPacRecords();
     let savedLumpSum = 0;
     let savedPacMonthly = 0;
@@ -548,15 +438,13 @@
       try {
         const saved = JSON.parse(localStorage.getItem("sim_pacRecords") || "[]");
         return Array.isArray(saved) ? saved : [];
-      } catch {
-        return [];
-      }
+      } catch { return []; }
     }
 
     function syncPacValuesFromRecords() {
       const monthlyRecords = pacRecords
         .filter(record => record.type === "monthly" && Number(record.amount) >= 0 && record.date)
-        .sort((first, second) => first.date.localeCompare(second.date));
+        .sort((a, b) => a.date.localeCompare(b.date));
       const lumpRecords = pacRecords.filter(record => record.type === "lump" && Number(record.amount) >= 0);
       const dates = pacRecords.map(record => record.date).filter(Boolean).sort();
 
@@ -580,22 +468,9 @@
       localStorage.setItem("sim_pacRecords", JSON.stringify(pacRecords));
     }
 
-    function refreshSharedPacData() {
-      pacRecords = readPacRecords();
-      syncPacValuesFromRecords();
-      ({ paymentsCount, totalDeposited } = calculatePaymentsAndDeposits());
-      document.getElementById("paymentsCountDisplay").textContent = paymentsCount + " mesi (" + paymentsCount + " vers.)";
-      document.getElementById("totalDepositDisplay").textContent = EUR.format(totalDeposited);
-      document.getElementById("lumpSumDisplay").textContent = EUR.format(savedLumpSum);
-      document.getElementById("pacMonthlyDisplay").textContent = EUR.format(savedPacMonthly) + "/mese";
-      renderPacRecords();
-      renderTable();
-      renderSatelliteTable();
-    }
-
     function refreshPacCalculations() {
       syncPacValuesFromRecords();
-      ({ paymentsCount, totalDeposited } = calculatePaymentsAndDeposits());
+      const { paymentsCount, totalDeposited } = calculatePaymentsAndDeposits();
       document.getElementById("paymentsCountDisplay").textContent = paymentsCount + " mesi (" + paymentsCount + " vers.)";
       document.getElementById("totalDepositDisplay").textContent = EUR.format(totalDeposited);
       document.getElementById("lumpSumDisplay").textContent = EUR.format(savedLumpSum);
@@ -641,7 +516,7 @@
         date: document.getElementById("monthlyPacDate").value,
         amount: Number(document.getElementById("monthlyPacAmount").value)
       });
-      pacRecords.sort((first, second) => first.date.localeCompare(second.date));
+      pacRecords.sort((a, b) => a.date.localeCompare(b.date));
       savePacRecords();
       renderPacRecords();
       refreshPacCalculations();
@@ -655,7 +530,7 @@
         date: document.getElementById("lumpPacDate").value,
         amount: Number(document.getElementById("lumpPacAmount").value)
       });
-      pacRecords.sort((first, second) => first.date.localeCompare(second.date));
+      pacRecords.sort((a, b) => a.date.localeCompare(b.date));
       savePacRecords();
       renderPacRecords();
       refreshPacCalculations();
@@ -668,7 +543,6 @@
         .reduce((amount, change) => Number(change.amount), savedPacMonthly);
     }
 
-    // Calcolo dinamico dei versamenti in base alla data corrente del sistema
     function calculatePaymentsAndDeposits() {
       const startDate = new Date(startDateStr);
       const currentDate = new Date();
@@ -687,16 +561,13 @@
       }
       const totalDeposited = savedLumpSum + scheduledDeposits;
 
-      return {
-        paymentsCount,
-        totalDeposited
-      };
+      return { paymentsCount, totalDeposited };
     }
 
     let { paymentsCount, totalDeposited } = calculatePaymentsAndDeposits();
 
     document.getElementById("paymentsCountDisplay").textContent = paymentsCount + " mesi (" + paymentsCount + " vers.)";
-    document.getElementById("totalDepositDisplay").textContent = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(totalDeposited);
+    document.getElementById("totalDepositDisplay").textContent = EUR.format(totalDeposited);
     document.getElementById("lumpSumDisplay").textContent = EUR.format(savedLumpSum);
     document.getElementById("pacMonthlyDisplay").textContent = EUR.format(savedPacMonthly) + "/mese";
 
@@ -712,6 +583,24 @@
       { name: "Xtrackers CSI 300 Tech", percent: 30.0, returnRate: 8.0, color: "#a855f7" },
       { name: "iShares Global Clean Energy", percent: 25.0, returnRate: 6.0, color: "#22c55e" }
     ];
+
+    const savedCore = localStorage.getItem("sim_portfolioData");
+    if (savedCore) { try { portfolioData.splice(0, portfolioData.length, ...JSON.parse(savedCore)); } catch {} }
+
+    const savedSat = localStorage.getItem("sim_satelliteData");
+    if (savedSat) { try { satelliteData.splice(0, satelliteData.length, ...JSON.parse(savedSat)); } catch {} }
+
+    // Ricalcola e salva il tasso medio ponderato combinato
+    function saveCalculatedEquityReturn() {
+      const coreWeighted = portfolioData.reduce((sum, item) => sum + (item.percent / 100) * item.returnRate, 0);
+      const satelliteWeighted = satelliteData.reduce((sum, item) => sum + (item.percent / 100) * item.returnRate, 0);
+      
+      const totalWeightedReturn = (coreWeighted * CORE_SHARE) + (satelliteWeighted * SATELLITE_SHARE);
+
+      localStorage.setItem("sim_equityReturn", totalWeightedReturn.toFixed(2));
+      localStorage.setItem("sim_portfolioData", JSON.stringify(portfolioData));
+      localStorage.setItem("sim_satelliteData", JSON.stringify(satelliteData));
+    }
 
     const tableBody = document.getElementById("tableBody");
     const totalPercentEl = document.getElementById("totalPercent");
@@ -746,15 +635,12 @@
         sumNet += netEstimated;
 
         const tr = document.createElement("tr");
+        const etfUrl = etfLinks[item.name] || 'https://www.justetf.com/it/search.html?query=' + encodeURIComponent(item.name);
         tr.innerHTML = `
-          <td class="asset-name">${item.name}</td>
-          <td>
-            <input type="number" class="table-input" value="${item.percent.toFixed(2)}" step="0.5" min="0" max="100" data-index="${index}" data-field="percent"> %
-          </td>
+          <td class="asset-name"><a href="${etfUrl}" target="_blank" title="Visualizza andamento su JustETF">${item.name}</a></td>
+          <td><input type="number" class="table-input" value="${item.percent.toFixed(2)}" step="0.5" min="0" max="100" data-index="${index}" data-field="percent"> %</td>
           <td>${EUR.format(assetValue)}</td>
-          <td>
-            <input type="number" class="table-input" value="${item.returnRate.toFixed(1)}" step="0.1" data-index="${index}" data-field="returnRate"> %
-          </td>
+          <td><input type="number" class="table-input" value="${item.returnRate.toFixed(1)}" step="0.1" data-index="${index}" data-field="returnRate"> %</td>
           <td>${EUR.format(netEstimated)}</td>
         `;
         tableBody.appendChild(tr);
@@ -765,12 +651,13 @@
       avgReturnEl.textContent = weightedReturn.toFixed(2).replace('.', ',') + "%";
       totalNetEl.textContent = EUR.format(sumNet);
 
+      saveCalculatedEquityReturn();
+
       tableBody.querySelectorAll(".table-input").forEach(input => {
         input.addEventListener("input", (e) => {
           const idx = Number(e.target.dataset.index);
           const field = e.target.dataset.field;
-          const val = parseFloat(e.target.value) || 0;
-          portfolioData[idx][field] = val;
+          portfolioData[idx][field] = parseFloat(e.target.value) || 0;
           renderTable();
           updateChart();
         });
@@ -795,11 +682,12 @@
         sumNet += netEstimated;
 
         const tr = document.createElement("tr");
+        const etfUrl = etfLinks[item.name] || 'https://www.justetf.com/it/search.html?query=' + encodeURIComponent(item.name);
         tr.innerHTML = `
-          <td class="asset-name">${item.name}</td>
+          <td class="asset-name"><a href="${etfUrl}" target="_blank" title="Visualizza andamento su JustETF">${item.name}</a></td>
           <td><input type="number" class="table-input" value="${item.percent.toFixed(2)}" step="0.5" min="0" max="100" data-index="${index}" data-field="percent"> %</td>
           <td>${EUR.format(assetValue)}</td>
-          <td><input type="number" class="table-input" value="${item.returnRate.toFixed(1)}" step="0.1" min="0" data-index="${index}" data-field="returnRate"> %</td>
+          <td><input type="number" class="table-input" value="${item.returnRate.toFixed(1)}" step="0.1" data-index="${index}" data-field="returnRate"> %</td>
           <td>${EUR.format(netEstimated)}</td>
         `;
         satelliteTableBody.appendChild(tr);
@@ -810,11 +698,13 @@
       satelliteAvgReturnEl.textContent = weightedReturn.toFixed(2).replace('.', ',') + "%";
       satelliteTotalNetEl.textContent = EUR.format(sumNet);
 
+      saveCalculatedEquityReturn();
+
       satelliteTableBody.querySelectorAll(".table-input").forEach(input => {
-        input.addEventListener("input", (event) => {
-          const index = Number(event.target.dataset.index);
-          const field = event.target.dataset.field;
-          satelliteData[index][field] = parseFloat(event.target.value) || 0;
+        input.addEventListener("input", (e) => {
+          const index = Number(e.target.dataset.index);
+          const field = e.target.dataset.field;
+          satelliteData[index][field] = parseFloat(e.target.value) || 0;
           renderSatelliteTable();
           updateSatelliteChart();
         });
@@ -838,22 +728,8 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              position: "bottom",
-              labels: {
-                color: "#cbd5e1",
-                usePointStyle: true,
-                padding: 14,
-                font: { size: 11 }
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label: function(context) {
-                  return ` ${context.label}: ${context.raw}%`;
-                }
-              }
-            }
+            legend: { position: "bottom", labels: { color: "#cbd5e1", usePointStyle: true, padding: 14, font: { size: 11 } } },
+            tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } }
           },
           cutout: "65%"
         }
@@ -885,10 +761,7 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: {
-              position: "bottom",
-              labels: { color: "#cbd5e1", usePointStyle: true, padding: 14, font: { size: 11 } }
-            }
+            legend: { position: "bottom", labels: { color: "#cbd5e1", usePointStyle: true, padding: 14, font: { size: 11 } } }
           },
           cutout: "65%"
         }
@@ -908,6 +781,5 @@
     initSatelliteChart();
     renderPacRecords();
   </script>
-
 </body>
 </html>

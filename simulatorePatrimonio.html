@@ -8,6 +8,8 @@
 
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <!-- html2pdf.js per la generazione di report PDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     :root {
@@ -440,6 +442,8 @@
           Modifica i parametri e osserva in tempo reale l'evoluzione di BTP, Fondo Emergenze,
           Fondo Pensione, Motore Azionario e Patrimonio Totale Netto.
         </p>
+
+        
       </div>
 <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
   <a href="gestioneStipendio.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #3b82f6; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">💰 Gestione Stipendio</a>
@@ -447,8 +451,94 @@
   <a href="contatoreConsumi.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #f59e0b; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">⚡ Contatore Consumi</a>
   
   <a href="calcolatoreObiettivo.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #22c55e; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">🎯 Calcolatore Obiettivi</a>
+
+  <a href="mutuoVsAffitto.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #ed13f5; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">🏠 Calcolatore Mutuo</a>
+
+  <a href="monteCarlo.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #05eeff; color: #000000; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 12px; white-space: nowrap;">📈 Monte Carlo</a>
 </div>
     </header>
+    <!-- Interruttore Toggle per la Modalità Privacy -->
+<div style="display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; margin-top: 10px;">
+  <span style="font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase;">🔒 Privacy</span>
+  <label class="privacy-switch" style="position: relative; display: inline-block; width: 48px; height: 24px; margin: 0; cursor: pointer;">
+    <input type="checkbox" id="privacyToggleSwitch" onchange="togglePrivacyMode()" style="opacity: 0; width: 0; height: 0;" />
+    <span class="privacy-slider" style="position: absolute; cursor: pointer; inset: 0; background-color: #16203a; border: 1px solid var(--border); transition: .3s; border-radius: 24px;"></span>
+  </label>
+</div>
+
+<style>
+  /* Interruttore rigorosamente verde quando attivo */
+  .privacy-switch input:checked + .privacy-slider {
+    background-color: #22c55e !important;
+    border-color: #22c55e !important;
+  }
+  .privacy-switch input:checked + .privacy-slider:before {
+    transform: translateX(24px);
+  }
+  .privacy-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+</style>
+<script>
+function togglePrivacyMode() {
+  const checkbox = document.getElementById("privacyToggleSwitch");
+  const privacyActive = checkbox.checked;
+  
+  // 1. Maschera o ripristina le cifre nei box HTML
+  const valueElements = document.querySelectorAll('.card .value, .equity-summary strong');
+  valueElements.forEach(el => {
+    if (privacyActive) {
+      if (!el.dataset.original) {
+        el.dataset.original = el.textContent;
+      }
+      el.textContent = '•••• €';
+    } else {
+      if (el.dataset.original) {
+        el.textContent = el.dataset.original;
+      }
+    }
+  });
+
+  // 2. Ricalcola e ridisegna completamente il grafico per aggiornare i ticks dell'asse Y
+  if (typeof buildSimulation === "function" && typeof createOrUpdateChart === "function") {
+    const currentSim = buildSimulation();
+    createOrUpdateChart(currentSim);
+  } else if (window.chart) {
+    window.chart.update();
+  }
+}
+</script>
+
+
+<style>
+  /* Stile grafico della levetta scorrevole */
+  .switch input:checked + .slider {
+    background-color: #22c55e;
+    border-color: #22c55e;
+  }
+  .switch input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+  }
+</style>
 
     <!-- RIEPILOGO: SITUAZIONE ATTUALE -->
     <div class="recap-header">
@@ -694,6 +784,12 @@
   <div id="emptyDiaryState" style="text-align: center; padding: 20px; color: var(--muted);">Nessuna nota registrata nel diario.</div>
 </section>
 
+
+  <div style="display: flex; gap: 8px; align-items: center; flex-wrap: nowrap;">
+          <button onclick="generatePDFReport()" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; background: #ef4444; color: #ffffff; font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; border: 0; border-radius: 12px; cursor: pointer; white-space: nowrap;">📄 Esporta Report PDF</button>
+          
+  </div>
+
 <!-- ========================================== -->
 <!-- SEZIONE: ZONA PERICOLOSA (RESET TOTALE)    -->
 <!-- ========================================== -->
@@ -883,31 +979,45 @@
     }
 
     function applyPacRecordsToConfig() {
-      CONFIG.lumpSum = 0;
-      CONFIG.pacMonthly = 0;
-      CONFIG.pacChanges = [];
+  CONFIG.lumpSum = 0;
+  CONFIG.pacMonthly = 0;
+  CONFIG.pacChanges = [];
 
-      try {
-        const records = JSON.parse(localStorage.getItem("sim_pacRecords") || "[]");
-        if (!Array.isArray(records) || records.length === 0) return;
+  // Legge il tasso salvato da esploraPAC.html
+  const savedEquityReturn = localStorage.getItem("sim_equityReturn");
+  if (savedEquityReturn !== null && !isNaN(parseFloat(savedEquityReturn))) {
+    CONFIG.equityReturn = parseFloat(savedEquityReturn);
+    els.equityReturn.value = CONFIG.equityReturn;
+  } else {
+    CONFIG.equityReturn = 7.0;
+    els.equityReturn.value = 7.0;
+  }
 
-        const monthlyRecords = records
-          .filter(record => record.source !== "transfer" && record.type === "monthly" && Number(record.amount) >= 0 && record.date)
-          .sort((first, second) => first.date.localeCompare(second.date));
-        const lumpRecords = records.filter(record => record.source !== "transfer" && record.type === "lump" && Number(record.amount) >= 0);
+  try {
+    const records = JSON.parse(localStorage.getItem("sim_pacRecords") || "[]");
+    if (Array.isArray(records) && records.length > 0) {
+      const monthlyRecords = records
+        .filter(record => record.source !== "transfer" && record.type === "monthly" && Number(record.amount) >= 0 && record.date)
+        .sort((a, b) => a.date.localeCompare(b.date));
+      const lumpRecords = records.filter(record => record.source !== "transfer" && record.type === "lump" && Number(record.amount) >= 0);
 
-        if (monthlyRecords.length > 0) {
-          CONFIG.pacMonthly = Number(monthlyRecords[0].amount);
-          CONFIG.pacChanges = monthlyRecords.slice(1).map(record => ({
-            year: new Date(`${record.date}T00:00:00`).getFullYear(),
-            amount: Number(record.amount)
-          }));
-        }
-        if (lumpRecords.length > 0) {
-          CONFIG.lumpSum = lumpRecords.reduce((total, record) => total + Number(record.amount), 0);
-        }
-      } catch {}
+      if (monthlyRecords.length > 0) {
+        CONFIG.pacMonthly = Number(monthlyRecords[0].amount);
+        CONFIG.pacChanges = monthlyRecords.slice(1).map(record => ({
+          year: new Date(`${record.date}T00:00:00`).getFullYear(),
+          amount: Number(record.amount)
+        }));
+      }
+      if (lumpRecords.length > 0) {
+        CONFIG.lumpSum = lumpRecords.reduce((total, record) => total + Number(record.amount), 0);
+      }
     }
+  } catch {}
+
+  // FIX: Aggiorna gli elementi HTML che vengono letti da readInputs()
+  els.lumpSum.value = CONFIG.lumpSum;
+  els.pacMonthly.value = CONFIG.pacMonthly;
+}
 
     function applyBtpRecordsToInputs() {
       if (CONFIG.btpRecords.length === 0) {
@@ -1027,30 +1137,36 @@
     }
 
     function simulateEquity(years, inputs) {
-      const data = [];
-      let value = null;
-      let lumpInserted = false;
-      const monthlyRate = Math.pow(1 + inputs.equityReturn, 1 / 12) - 1;
+  const data = [];
+  let value = null;
+  let lumpInserted = false;
+  const monthlyRate = Math.pow(1 + inputs.equityReturn, 1 / 12) - 1;
 
-      for (const year of years) {
-        const lumpActive = CONFIG.lumpStartYear !== null && year >= CONFIG.lumpStartYear;
-        const pacActive = CONFIG.pacStartYear !== null && year >= CONFIG.pacStartYear;
-        if (!lumpActive && !pacActive && value === null) { data.push(null); continue; }
-        if (value === null) value = 0;
+  years.forEach((year, index) => {
+    const lumpActive = CONFIG.lumpStartYear !== null && year >= CONFIG.lumpStartYear;
+    const pacActive = CONFIG.pacStartYear !== null && year >= CONFIG.pacStartYear;
+    if (!lumpActive && !pacActive && value === null) { data.push(null); return; }
+    if (value === null) value = 0;
 
-        if (lumpActive && !lumpInserted) {
-          value += inputs.lumpSum;
-          lumpInserted = true;
-        }
-
-        for (let month = 0; month < 12; month++) {
-          if (pacActive) value += getPacMonthlyForYear(year, inputs.pacMonthly);
-          value *= (1 + monthlyRate);
-        }
-        data.push(value);
-      }
-      return data;
+    if (lumpActive && !lumpInserted) {
+      value += inputs.lumpSum;
+      lumpInserted = true;
     }
+
+    // Al primo anno (2026) registra il valore versato senza ancora applicare i 12 mesi di crescita
+    if (index === 0) {
+      data.push(value);
+      return;
+    }
+
+    for (let month = 0; month < 12; month++) {
+      if (pacActive) value += getPacMonthlyForYear(year, inputs.pacMonthly);
+      value *= (1 + monthlyRate);
+    }
+    data.push(value);
+  });
+  return data;
+}
 
     function cumulativeContributions(years, inputs) {
       const data = [];
@@ -1149,46 +1265,67 @@
     }
 
     function createOrUpdateChart(sim) {
-      const ctx = document.getElementById("wealthChart").getContext("2d");
-      const pointRadiusTotal = pointRadii(sim.years, CONFIG.currentYear);
-      const pointColorTotal = pointColors(sim.years, CONFIG.currentYear, "#22c55e");
+  const ctx = document.getElementById("wealthChart").getContext("2d");
+  const pointRadiusTotal = pointRadii(sim.years, CONFIG.currentYear);
+  const pointColorTotal = pointColors(sim.years, CONFIG.currentYear, "#22c55e");
 
-      const datasets = [
-        { label: "Patrimonio Totale Netto", data: sim.totalNet, borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,.12)", pointRadius: pointRadiusTotal, pointHoverRadius: 8, pointBackgroundColor: pointColorTotal, pointBorderColor: pointColorTotal, borderWidth: 3, tension: 0.28, fill: false },
-        { label: "Fondo Pensione", data: sim.pensionNetSeries, borderColor: "#a855f7", pointRadius: 0, borderWidth: 2, borderDash: [6, 6], tension: 0.25, fill: false },
-        { label: "Portafoglio PIR", data: sim.pirNetSeries, borderColor: "#60a5fa", pointRadius: 0, borderWidth: 2, borderDash: [5, 5], tension: 0.25, fill: false },
-        { label: "Motore Azionario", data: sim.ordinaryEquityNetSeries, borderColor: "#38bdf8", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
-        { label: "Valore BTP", data: sim.btp, borderColor: "#f59e0b", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
-        { label: "Fondo Emergenze", data: sim.emergency, borderColor: "#ec4899", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
-        { label: "Capitale Investito", data: sim.contributions, borderColor: "#64748b", pointRadius: 0, borderWidth: 1.5, tension: 0.15, fill: false },
-        { label: "Target €1.000.000", data: sim.years.map(() => CONFIG.target), borderColor: "#94a3b8", pointRadius: 0, borderWidth: 1.5, borderDash: [3, 6], tension: 0 }
-      ];
+  const datasets = [
+    { label: "Patrimonio Totale Netto", data: sim.totalNet, borderColor: "#22c55e", backgroundColor: "rgba(34,197,94,.12)", pointRadius: pointRadiusTotal, pointHoverRadius: 8, pointBackgroundColor: pointColorTotal, pointBorderColor: pointColorTotal, borderWidth: 3, tension: 0.28, fill: false },
+    { label: "Fondo Pensione", data: sim.pensionNetSeries, borderColor: "#a855f7", pointRadius: 0, borderWidth: 2, borderDash: [6, 6], tension: 0.25, fill: false },
+    { label: "Portafoglio PIR", data: sim.pirNetSeries, borderColor: "#60a5fa", pointRadius: 0, borderWidth: 2, borderDash: [5, 5], tension: 0.25, fill: false },
+    { label: "Motore Azionario", data: sim.ordinaryEquityNetSeries, borderColor: "#38bdf8", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
+    { label: "Valore BTP", data: sim.btp, borderColor: "#f59e0b", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
+    { label: "Fondo Emergenze", data: sim.emergency, borderColor: "#ec4899", pointRadius: 0, borderWidth: 2, borderDash: [7, 6], tension: 0.25, fill: false },
+    { label: "Capitale Investito", data: sim.contributions, borderColor: "#64748b", pointRadius: 0, borderWidth: 1.5, tension: 0.15, fill: false },
+    { label: "Target €1.000.000", data: sim.years.map(() => CONFIG.target), borderColor: "#94a3b8", pointRadius: 0, borderWidth: 1.5, borderDash: [3, 6], tension: 0 }
+  ];
 
-      const options = {
-        responsive: true, maintainAspectRatio: false,
-        interaction: { intersect: false, mode: "index" },
-        plugins: {
-          legend: { position: "bottom", labels: { color: "#cbd5e1", usePointStyle: true, pointStyle: "line", padding: 18 } },
-          tooltip: {
-            backgroundColor: "rgba(15,23,42,.96)", titleColor: "#f8fafc", bodyColor: "#cbd5e1", borderColor: "rgba(255,255,255,.12)", borderWidth: 1, padding: 12,
-            callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw == null ? "—" : formatCurrency(ctx.raw)}` }
+  const options = {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { intersect: false, mode: "index" },
+    plugins: {
+      legend: { position: "bottom", labels: { color: "#cbd5e1", usePointStyle: true, pointStyle: "line", padding: 18 } },
+      tooltip: {
+        backgroundColor: "rgba(15,23,42,.96)", titleColor: "#f8fafc", bodyColor: "#cbd5e1", borderColor: "rgba(255,255,255,.12)", borderWidth: 1, padding: 12,
+        callbacks: {
+          label: ctx => {
+            const privacySwitch = document.getElementById("privacyToggleSwitch");
+            if (privacySwitch && privacySwitch.checked) {
+              return `${ctx.dataset.label}: •••• €`;
+            }
+            return `${ctx.dataset.label}: ${ctx.raw == null ? "—" : formatCurrency(ctx.raw)}`;
           }
-        },
-        scales: {
-          x: { grid: { color: "rgba(148,163,184,.07)" }, ticks: { color: "#94a3b8" } },
-          y: { beginAtZero: true, grid: { color: "rgba(148,163,184,.09)" }, ticks: { color: "#94a3b8", callback: value => formatCurrency(value) } }
         }
-      };
-
-      if (!chart) {
-        chart = new Chart(ctx, { type: "line", data: { labels: sim.years, datasets }, options });
-      } else {
-        chart.data.labels = sim.years;
-        chart.data.datasets = datasets;
-        chart.options = options;
-        chart.update("none");
+      }
+    },
+    scales: {
+      x: { grid: { color: "rgba(148,163,184,.07)" }, ticks: { color: "#94a3b8" } },
+      y: { 
+        beginAtZero: true, 
+        grid: { color: "rgba(148,163,184,.09)" }, 
+        ticks: { 
+          color: "#94a3b8", 
+          callback: value => {
+            const privacySwitch = document.getElementById("privacyToggleSwitch");
+            if (privacySwitch && privacySwitch.checked) {
+              return '•••• €';
+            }
+            return formatCurrency(value);
+          } 
+        } 
       }
     }
+  };
+
+  if (!chart) {
+    chart = new Chart(ctx, { type: "line", data: { labels: sim.years, datasets }, options });
+  } else {
+    chart.data.labels = sim.years;
+    chart.data.datasets = datasets;
+    chart.options = options;
+    chart.update("none");
+  }
+}
 
     function updateCards(sim) {
       els.cardContributed.textContent = formatCurrency(sim.finalContributed);
@@ -1325,6 +1462,132 @@
   }
 
   renderDiary();
+
+  function generatePDFReport() {
+  const sim = buildSimulation();
+  const currentDate = new Date().toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+  const diaryNotes = readDiary();
+
+  // Contenitore HTML adattato al 100% della larghezza A4 (senza tagli a destra)
+  const reportContainer = document.createElement('div');
+  reportContainer.id = 'pdfReportTemplate';
+  reportContainer.style.cssText = `
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    color: #0f172a;
+    padding: 20px;
+    background: #ffffff;
+    width: 100%;
+    box-sizing: border-box;
+  `;
+
+  reportContainer.innerHTML = `
+    <!-- INTESTAZIONE REPORT -->
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3b82f6; padding-bottom: 10px; margin-bottom: 16px;">
+      <div>
+        <h1 style="margin: 0; font-size: 20px; color: #0f172a; font-weight: 800; letter-spacing: -0.02em;">WEALTH STRATEGY</h1>
+        <div style="font-size: 11px; color: #64748b; font-weight: 600;">Report Proiezione Patrimoniale Completa · 32 Anni</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;">Data Generazione</div>
+        <div style="font-size: 12px; font-weight: 700; color: #0f172a;">${currentDate}</div>
+      </div>
+    </div>
+
+    <!-- SINTESI ESECUTIVA -->
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 16px;">
+      <h3 style="margin: 0 0 8px; font-size: 12px; color: #1e293b; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em;">Sintesi Finale Orizzonte 32 Anni</h3>
+      <table style="width: 100%; border-collapse: collapse; font-size: 11px;">
+        <tr>
+          <td style="padding: 4px 0; color: #475569;">Totale Capitale Versato:</td>
+          <td style="padding: 4px 0; font-weight: 800; text-align: right; color: #0f172a;">${formatCurrency(sim.finalContributed)}</td>
+        </tr>
+        <tr>
+          <td style="padding: 4px 0; color: #475569;">Guadagno Netto Generato (dopo 26% tax):</td>
+          <td style="padding: 4px 0; font-weight: 800; text-align: right; color: #16a34a;">+${formatCurrency(sim.finalTotal - sim.finalContributed)}</td>
+        </tr>
+        <tr style="border-top: 1px solid #cbd5e1;">
+          <td style="padding: 6px 0; font-size: 13px; font-weight: 800; color: #0f172a;">Patrimonio Netto Finale a Scadenza:</td>
+          <td style="padding: 6px 0; font-size: 15px; font-weight: 900; text-align: right; color: #2563eb;">${formatCurrency(sim.finalTotal)}</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- RIPARTIZIONE PILASTRI -->
+    <h3 style="margin: 12px 0 6px; font-size: 11px; color: #1e293b; font-weight: 800; text-transform: uppercase;">Ripartizione Finale dei Pilastri</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 10px; margin-bottom: 16px;">
+      <thead>
+        <tr style="background: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
+          <th style="padding: 6px; text-align: left;">Pilastro</th>
+          <th style="padding: 6px; text-align: right;">Valore Accumulato (€)</th>
+          <th style="padding: 6px; text-align: right;">Quota %</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9;">Motore Azionario (PAC)</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${formatCurrency(sim.finalEquity)}</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right;">${((sim.finalEquity / sim.finalTotal) * 100).toFixed(1)}%</td></tr>
+        <tr><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9;">BTP (Titoli di Stato)</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${formatCurrency(sim.finalBtp)}</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right;">${((sim.finalBtp / sim.finalTotal) * 100).toFixed(1)}%</td></tr>
+        <tr><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9;">Fondo Emergenze</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${formatCurrency(sim.finalEmergency)}</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right;">${((sim.finalEmergency / sim.finalTotal) * 100).toFixed(1)}%</td></tr>
+        <tr><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9;">Fondo Pensione</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${formatCurrency(sim.finalPension)}</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right;">${((sim.finalPension / sim.finalTotal) * 100).toFixed(1)}%</td></tr>
+        <tr><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9;">Portafoglio PIR</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700;">${formatCurrency(sim.finalPir)}</td><td style="padding: 5px 6px; border-bottom: 1px solid #f1f5f9; text-align: right;">${((sim.finalPir / sim.finalTotal) * 100).toFixed(1)}%</td></tr>
+      </tbody>
+    </table>
+
+    <!-- PROGRESSI ANNO PER ANNO (COMPLETO 1-32 ANNI) -->
+    <h3 style="margin: 12px 0 6px; font-size: 11px; color: #1e293b; font-weight: 800; text-transform: uppercase;">Progressione Anno per Anno (1 - 32)</h3>
+    <table style="width: 100%; border-collapse: collapse; font-size: 9.5px; margin-bottom: 16px;">
+      <thead>
+        <tr style="background: #f1f5f9; border-bottom: 1px solid #cbd5e1;">
+          <th style="padding: 4px 6px; text-align: left;">Anno</th>
+          <th style="padding: 4px 6px; text-align: right;">Capitale Versato</th>
+          <th style="padding: 4px 6px; text-align: right;">Patrimonio Netto</th>
+          <th style="padding: 4px 6px; text-align: right;">Guadagno Netto</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${sim.years.map((year, idx) => {
+          const contrib = sim.contributions[idx] ?? 0;
+          const netTotal = sim.totalNet[idx] ?? 0;
+          const gain = netTotal - contrib;
+          return `
+            <tr style="background: ${idx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
+              <td style="padding: 3px 6px; border-bottom: 1px solid #f1f5f9; font-weight: 700;">Anno ${idx + 1} (${year})</td>
+              <td style="padding: 3px 6px; border-bottom: 1px solid #f1f5f9; text-align: right;">${formatCurrency(contrib)}</td>
+              <td style="padding: 3px 6px; border-bottom: 1px solid #f1f5f9; text-align: right; font-weight: 700; color: #2563eb;">${formatCurrency(netTotal)}</td>
+              <td style="padding: 3px 6px; border-bottom: 1px solid #f1f5f9; text-align: right; color: #16a34a; font-weight: 600;">+${formatCurrency(gain)}</td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+
+    ${diaryNotes.length > 0 ? `
+      <!-- ULTIME NOTE DI BORDO -->
+      <h3 style="margin: 12px 0 6px; font-size: 11px; color: #1e293b; font-weight: 800; text-transform: uppercase;">Ultime Note dal Diario di Bordo</h3>
+      <div style="font-size: 9.5px; color: #334155;">
+        ${diaryNotes.slice(0, 3).map(note => `
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px; margin-bottom: 4px;">
+            <div style="font-weight: 800; color: #2563eb;">${note.date} — ${note.title}</div>
+            <div style="color: #475569; margin-top: 2px;">${note.content}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : ''}
+
+    <div style="margin-top: 16px; text-align: center; font-size: 8.5px; color: #94a3b8; border-top: 1px solid #e2e8f0; padding-top: 8px;">
+      Documento ad uso personale generato da Wealth Strategy Simulator. Non costituisce sollecitazione all'investimento.
+    </div>
+  `;
+
+  // Configurazione PDF per impaginazione automatica su più pagine
+  const opt = {
+    margin:       [8, 8, 8, 8],
+    filename:     `Report_Wealth_Strategy_${new Date().toISOString().slice(0, 10)}.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2, useCORS: true },
+    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(reportContainer).save();
+}
 
   </script>
 
