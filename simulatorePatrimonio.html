@@ -493,6 +493,13 @@
   }
 </style>
 <script>
+  if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then((reg) => console.log('Service Worker registrato con successo!', reg))
+      .catch((err) => console.log('Registrazione Service Worker fallita:', err));
+  });
+}
 function togglePrivacyMode() {
   const checkbox = document.getElementById("privacyToggleSwitch");
   const privacyActive = checkbox.checked;
