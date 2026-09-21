@@ -462,11 +462,14 @@
   <span style="font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase;">🔒 Privacy</span>
   <label class="privacy-switch" style="position: relative; display: inline-block; width: 48px; height: 24px; margin: 0; cursor: pointer;">
     <input type="checkbox" id="privacyToggleSwitch" onchange="togglePrivacyMode()" style="opacity: 0; width: 0; height: 0;" />
+    
     <span class="privacy-slider" style="position: absolute; cursor: pointer; inset: 0; background-color: #16203a; border: 1px solid var(--border); transition: .3s; border-radius: 24px;"></span>
   </label>
 </div>
-
-<style>
+<div style="display: inline-flex; align-items: center; gap: 12px; background: rgba(255,255,255,.03); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; margin-top: 10px;">
+  <span style="font-size: 13px; font-weight: 800; color: var(--muted); text-transform: uppercase;">⚡ Simulazione</span>
+  <a href="modalitaSimulazione.html" style="display: inline-flex; align-items: center; justify-content: center; padding: 6px 12px; background: #16203a; border: 1px solid var(--border); color: var(--accent); font-family: Inter, system-ui, sans-serif; font-weight: 800; font-size: 12px; text-decoration: none; border-radius: 8px; transition: .3s; white-space: nowrap;">Avvia</a>
+</div><style>
   /* Interruttore rigorosamente verde quando attivo */
   .privacy-switch input:checked + .privacy-slider {
     background-color: #22c55e !important;
@@ -551,27 +554,28 @@ function togglePrivacyMode() {
         <div class="value" id="cardCurrentContributed">€0</div>
       </div>
 
-      <div class="card" style="--card-color:var(--orange)">
+      <!-- Card BTP interattiva con reindirizzamento -->
+      <div class="card clickable" style="--card-color:var(--orange); cursor: pointer;" onclick="window.location.href='btpRecords.html'" title="Clicca per aprire la gestione BTP">
         <div class="label">BTP</div>
         <div class="value" id="cardCurrentBtp">€0</div>
       </div>
 
-      <div class="card" style="--card-color:var(--pink)">
+      <div class="card" style="--card-color:var(--pink); cursor: pointer;" onclick="window.location.href='fondoEmergenze.html'" title="Clicca per aprire la gestione BTP">
         <div class="label">Emergenze</div>
         <div class="value" id="cardCurrentEmergency">€0</div>
       </div>
 
-      <div class="card" style="--card-color:var(--purple)">
+      <div class="card" style="--card-color:var(--purple); cursor: pointer;" onclick="window.location.href='fondoPensione.html'" title="Clicca per aprire la gestione BTP">
         <div class="label">Pensione</div>
         <div class="value" id="cardCurrentPension">€0</div>
       </div>
 
-      <div class="card" style="--card-color:var(--accent)">
+      <div class="card" style="--card-color:var(--accent); cursor: pointer;" onclick="window.location.href='pir.html'" title="Clicca per aprire la gestione BTP">
         <div class="label">PIR</div>
         <div class="value" id="cardCurrentPir">€0</div>
       </div>
 
-      <div class="card" style="--card-color:var(--cyan)">
+      <div class="card" style="--card-color:var(--cyan); cursor: pointer;" onclick="window.location.href='esploraPAC.html'" title="Clicca per aprire la gestione BTP">
         <div class="label">Azionario</div>
         <div class="value" id="cardCurrentEquity">€0</div>
       </div>
@@ -658,8 +662,6 @@ function togglePrivacyMode() {
             Obiettivo
             <strong>€1.000.000</strong>
           </div>
-          <a class="year-info-link" href="contatoreConsumi.html">Consumi</a>
-          <a class="year-info-link" href="calcolatoreObiettivo.html">Obiettivi</a>
         </div>
 
         <!-- Grafico -->
@@ -673,7 +675,7 @@ function togglePrivacyMode() {
         Le aliquote fiscali sono calcolate sulle plusvalenze maturate nei rispettivi regimi.
       </div>
     </section>
-
+    <br>
     <section class="section-grid">
       <!-- BTP + Emergency -->
       <div class="control-panel">
