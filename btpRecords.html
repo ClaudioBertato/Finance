@@ -61,7 +61,9 @@
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th, td { padding: 12px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
     th { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
-    .remove { padding: 7px 10px; color: var(--text); background: rgba(239,68,68,.16); border: 1px solid rgba(239,68,68,.35); }
+    .action-buttons { display: flex; gap: 6px; }
+    .remove { padding: 7px 10px; color: var(--text); background: rgba(239,68,68,.16); border: 1px solid rgba(239,68,68,.35); border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px; }
+    .edit { padding: 7px 10px; color: #08111f; background: var(--yellow); border: 1px solid rgba(245,158,11,.5); border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 12px; }
     .empty { padding: 22px 12px; color: var(--muted); text-align: center; }
     .status { min-height: 20px; margin-top: 12px; color: var(--muted); font-size: 12px; }
     .coupon-summary { margin-top: 22px; }
@@ -95,14 +97,15 @@
     </header>
 
     <section class="panel">
-      <h2>Nuovo acquisto BTP</h2>
+      <h2 id="formTitle">Nuovo acquisto BTP</h2>
       <form id="btpForm">
+        <input type="hidden" id="editIndex" value="" />
         <label>Data acquisto<input id="purchaseDate" type="date" required /></label>
         <label>Importo (€)<input id="amount" type="number" min="0" step="100" required /></label>
         <label>Durata (anni)<input id="duration" type="number" min="1" max="100" step="1" required /></label>
         <label>Tasso annuo (%)<input id="rate" type="number" min="0" max="100" step="0.01" required /></label>
         <label>Frequenza cedole (mesi)<input id="couponFrequency" type="number" min="1" max="12" step="1" value="6" required /></label>
-        <button type="submit">Aggiungi</button>
+        <button type="submit" id="submitBtn">Aggiungi</button>
       </form>
       <div class="status" id="status" aria-live="polite"></div>
 
@@ -116,7 +119,7 @@
               <th>Scadenza</th>
               <th>Tasso annuo</th>
               <th>Cedole ogni</th>
-              <th></th>
+              <th>Azioni</th>
             </tr>
           </thead>
           <tbody id="recordsBody"></tbody>
@@ -143,7 +146,7 @@
       </section>
     </section>
 
-    <!-- NUOVA SEZIONE: GESTIONE SCADENZE & SMISTAMENTO LIQUIDITÀ -->
+    <!-- SEZIONE: GESTIONE SCADENZE & SMISTAMENTO LIQUIDITÀ -->
     <section class="panel">
       <h2>🔄 Gestione Scadenze & Smistamento Liquidità</h2>
       <p style="color: var(--muted); font-size: 13px; margin-top: -10px; margin-bottom: 18px;">
@@ -197,6 +200,9 @@
     const EUR = new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 });
 
     const form = document.getElementById("btpForm");
+    const formTitle = document.getElementById("formTitle");
+    const submitBtn = document.getElementById("submitBtn");
+    const editIndexInput = document.getElementById("editIndex");
     const recordsBody = document.getElementById("recordsBody");
     const emptyState = document.getElementById("emptyState");
     const status = document.getElementById("status");
@@ -310,11 +316,36 @@
           </td>
           <td>${Number(record.rate).toFixed(2).replace(".", ",")}%</td>
           <td>${record.frequency} mesi</td>
-          <td><button class="remove" type="button" data-index="${index}">Elimina</button></td>
+          <td>
+            <div class="action-buttons">
+              <button class="edit" type="button" data-index="${index}">Modifica</button>
+              <button class="remove" type="button" data-index="${index}">Elimina</button>
+            </div>
+          </td>
         `;
         recordsBody.appendChild(row);
       });
 
+      // Gestione tasto Modifica
+      recordsBody.querySelectorAll(".edit").forEach(button => {
+        button.addEventListener("click", () => {
+          const idx = Number(button.dataset.index);
+          const rec = records[idx];
+          
+          editIndexInput.value = idx;
+          purchaseDate.value = rec.date;
+          document.getElementById("amount").value = rec.amount;
+          document.getElementById("duration").value = rec.duration;
+          document.getElementById("rate").value = rec.rate;
+          document.getElementById("couponFrequency").value = rec.frequency;
+
+          formTitle.textContent = "Modifica BTP Selezionato";
+          submitBtn.textContent = "Aggiorna";
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+
+      // Gestione tasto Elimina
       recordsBody.querySelectorAll(".remove").forEach(button => {
         button.addEventListener("click", () => {
           records.splice(Number(button.dataset.index), 1);
@@ -363,7 +394,7 @@
       const record = records.find(r => r.id === btpId);
       if (!record) return 0;
       const maturity = new Date(`${getMaturityDate(record.date, record.duration)}T00:00:00`);
-      if (new Date() < maturity) return 0; // Non ancora scaduto
+      if (new Date() < maturity) return 0;
 
       const totalTransferred = transfers
         .filter(t => t.btpId === btpId)
@@ -462,7 +493,6 @@
         return;
       }
 
-      // 1. REINVESTIMENTO IN NUOVO BTP
       if (destination === "reinvest_btp") {
         records.push({
           id: `btp_${Date.now()}`,
@@ -475,10 +505,7 @@
         saveRecords();
         renderRecords();
         renderCouponSummary();
-      }
-
-      // 2. VERSAMENTO UNA TANTUM SU PAC (Aggiorna "sim_pacRecords" letto da esploraPAC.html)
-      else if (destination === "pac") {
+      } else if (destination === "pac") {
         let pacRecords = [];
         try { pacRecords = JSON.parse(localStorage.getItem("sim_pacRecords") || "[]"); } catch { pacRecords = []; }
         pacRecords.push({
@@ -488,27 +515,17 @@
           source: "transfer"
         });
         localStorage.setItem("sim_pacRecords", JSON.stringify(pacRecords));
-      }
-
-      // 3. FONDO PENSIONE (Aggiorna "sim_pensionFund" letto da fondoPensione.html)
-      else if (destination === "fondo_pensione") {
+      } else if (destination === "fondo_pensione") {
         const currentPension = Number(localStorage.getItem("sim_pensionFund") || 0);
         localStorage.setItem("sim_pensionFund", String(currentPension + amount));
-      }
-
-      // 4. FONDO DI EMERGENZA (Aggiorna "sim_emergencyFund" letto da fondoEmergenze.html)
-      else if (destination === "fondo_emergenza") {
+      } else if (destination === "fondo_emergenza") {
         const currentEmergency = Number(localStorage.getItem("sim_emergencyFund") || 0);
         localStorage.setItem("sim_emergencyFund", String(currentEmergency + amount));
-      }
-
-      // 5. PIR (Aggiorna "sim_pirFund" letto da pir.html)
-      else if (destination === "pir") {
+      } else if (destination === "pir") {
         const currentPir = Number(localStorage.getItem("sim_pirFund") || 0);
         localStorage.setItem("sim_pirFund", String(currentPir + amount));
       }
 
-      // Registra il movimento nella cronologia dei trasferimenti BTP
       transfers.push({
         id: Date.now(),
         btpId,
@@ -528,14 +545,30 @@
 
     form.addEventListener("submit", event => {
       event.preventDefault();
-      records.push({
-        id: `btp_${Date.now()}`,
+      const editingIndex = editIndexInput.value;
+
+      const newRecord = {
+        id: editingIndex !== "" && records[editingIndex] ? records[editingIndex].id : `btp_${Date.now()}`,
         date: purchaseDate.value,
         amount: Number(document.getElementById("amount").value),
         duration: Number(document.getElementById("duration").value),
         rate: Number(document.getElementById("rate").value),
         frequency: Number(document.getElementById("couponFrequency").value)
-      });
+      };
+
+      if (editingIndex !== "") {
+        records[editingIndex] = newRecord;
+        status.textContent = "Acquisto aggiornato con successo.";
+      } else {
+        records.push(newRecord);
+        status.textContent = "Acquisto salvato. Il simulatore lo userà al prossimo caricamento.";
+      }
+
+      // Reset form state
+      editIndexInput.value = "";
+      formTitle.textContent = "Nuovo acquisto BTP";
+      submitBtn.textContent = "Aggiungi";
+
       records.sort((first, second) => first.date.localeCompare(second.date));
       saveRecords();
       renderRecords();
@@ -543,7 +576,6 @@
       renderTransferSection();
       form.reset();
       purchaseDate.value = new Date().toISOString().slice(0, 10);
-      status.textContent = "Acquisto salvato. Il simulatore lo usera al prossimo caricamento.";
     });
 
     renderRecords();
