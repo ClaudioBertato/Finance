@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modalità Simulazione - Evoluzione del Patrimonio</title>
+  <!-- Inclusione di Chart.js per il grafico -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #11182c;
+      --panel-2: #16203a;
+      --border: rgba(255,255,255,.08);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --green: #22c55e;
+      --orange: #f97316;
+      --purple: #a855f7;
+      --shadow: 0 20px 60px rgba(0,0,0,.28);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at 15% 10%, rgba(96,165,250,.13), transparent 28%), var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      padding: 20px 32px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      background: rgba(17,24,44,.6);
+    }
+
+    .back-link {
+      border: 0;
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: #08111f;
+      background: var(--accent);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .main-layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      flex: 1;
+      height: calc(100vh - 74px);
+    }
+
+    /* Pannello Controlli a Sinistra */
+    .controls-panel {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--orange);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-top: 10px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 4px;
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: var(--panel-2);
+      padding: 8px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    .control-group label {
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--muted);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .control-group span.val-display {
+      color: var(--accent);
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .info-box {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+      padding: 10px;
+      background: rgba(255,255,255,.02);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    /* Area Grafico a Destra */
+    .chart-container-wrapper {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .chart-subtitle {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .canvas-box {
+      flex: 1;
+      position: relative;
+      width: 100%;
+      min-height: 400px;
+    }
+
+    @media (max-width: 950px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div>
+      <span style="color: var(--accent); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;">Simulatore Avanzato</span>
+      <h1 style="margin: 4px 0 0; font-size: 20px;">Analisi Proiettata del Patrimonio</h1>
+    </div>
+    <a class="back-link" href="simulatorePatrimonio.html">Torna alla Dashboard</a>
+  </header>
+
+  <div class="main-layout">
+    <!-- Pannello dei controlli (Slider) -->
+    <aside class="controls-panel">
+      <div class="info-box">
+        💡 Gestisci l'orizzonte temporale e i parametri per BTP, PAC e PIR per simulare l'evoluzione complessiva.
+      </div>
+
+      <!-- ORIZZONTE TEMPORALE -->
+      <div class="section-title" style="color: var(--accent);">⏳ Orizzonte Temporale</div>
+      <div class="control-group">
+        <label>Durata Simulazione: <span id="lblOrizzonte" class="val-display">20 Anni</span></label>
+        <input type="range" id="slOrizzonte" min="5" max="40" step="1" value="20">
+      </div>
+
+      <!-- SEZIONE BTP -->
+      <div class="section-title">🪙 Sezione BTP</div>
+      <div class="control-group">
+        <label>Quota Versata: <span id="lblBtpQuota" class="val-display">10.000 €</span></label>
+        <input type="range" id="slBtpQuota" min="0" max="100000" step="1000" value="10000">
+      </div>
+      <div class="control-group">
+        <label>Rendimento Annuo: <span id="lblBtpRend" class="val-display">3.5 %</span></label>
+        <input type="range" id="slBtpRend" min="0" max="10" step="0.1" value="3.5">
+      </div>
+      <div class="control-group">
+        <label>Durata BTP: <span id="lblBtpDurata" class="val-display">10 Anni</span></label>
+        <input type="range" id="slBtpDurata" min="1" max="40" step="1" value="10">
+      </div>
+
+      <!-- SEZIONE PAC -->
+      <div class="section-title" style="color: var(--green);">📈 Sezione PAC</div>
+      <div class="control-group">
+        <label>Quota Una Tantum: <span id="lblPacUnaTantum" class="val-display">5.000 €</span></label>
+        <input type="range" id="slPacUnaTantum" min="0" max="50000" step="500" value="5000">
+      </div>
+      <div class="control-group">
+        <label>Versamento Mensile: <span id="lblPacMensile" class="val-display">200 €/mese</span></label>
+        <input type="range" id="slPacMensile" min="0" max="1500" step="50" value="200">
+      </div>
+      <div class="control-group">
+        <label>Tasso Medio: <span id="lblPacRend" class="val-display">6.0 %</span></label>
+        <input type="range" id="slPacRend" min="0" max="15" step="0.1" value="6.0">
+      </div>
+
+      <!-- SEZIONE PIR -->
+      <div class="section-title" style="color: var(--purple);">🛡️ Sezione PIR</div>
+      <div class="control-group">
+        <label>Quota Una Tantum: <span id="lblPirUnaTantum" class="val-display">3.000 €</span></label>
+        <input type="range" id="slPirUnaTantum" min="0" max="50000" step="500" value="3000">
+      </div>
+      <div class="control-group">
+        <label>Versamento Mensile: <span id="lblPirMensile" class="val-display">100 €/mese</span></label>
+        <input type="range" id="slPirMensile" min="0" max="1500" step="50" value="100">
+      </div>
+      <div class="control-group">
+        <label>Tasso Medio: <span id="lblPirRend" class="val-display">5.0 %</span></label>
+        <input type="range" id="slPirRend" min="0" max="15" step="0.1" value="5.0">
+      </div>
+
+    </aside>
+
+    <!-- Contenitore del grafico -->
+    <main class="chart-container-wrapper">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Evoluzione del patrimonio nel tempo</div>
+          <div class="chart-subtitle" id="rangeAnniLabel">Orizzonte: 2026 - 2046 | Target fisso: 1.000.000 €</div>
+        </div>
+      </div>
+
+      <div class="canvas-box">
+        <canvas id="simulationChart"></canvas>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Riferimenti agli slider
+    const slOrizzonte = document.getElementById("slOrizzonte");
+    const slBtpQuota = document.getElementById("slBtpQuota");
+    const slBtpRend = document.getElementById("slBtpRend");
+    const slBtpDurata = document.getElementById("slBtpDurata");
+
+    const slPacUnaTantum = document.getElementById("slPacUnaTantum");
+    const slPacMensile = document.getElementById("slPacMensile");
+    const slPacRend = document.getElementById("slPacRend");
+
+    const slPirUnaTantum = document.getElementById("slPirUnaTantum");
+    const slPirMensile = document.getElementById("slPirMensile");
+    const slPirRend = document.getElementById("slPirRend");
+
+    // Riferimenti alle etichette valore
+    const lblOrizzonte = document.getElementById("lblOrizzonte");
+    const lblBtpQuota = document.getElementById("lblBtpQuota");
+    const lblBtpRend = document.getElementById("lblBtpRend");
+    const lblBtpDurata = document.getElementById("lblBtpDurata");
+
+    const lblPacUnaTantum = document.getElementById("lblPacUnaTantum");
+    const lblPacMensile = document.getElementById("lblPacMensile");
+    const lblPacRend = document.getElementById("lblPacRend");
+
+    const lblPirUnaTantum = document.getElementById("lblPirUnaTantum");
+    const lblPirMensile = document.getElementById("lblPirMensile");
+    const lblPirRend = document.getElementById("lblPirRend");
+
+    const rangeAnniLabel = document.getElementById("rangeAnniLabel");
+
+    let myChart = null;
+
+    function formatEur(val) {
+      return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(val);
+    }
+
+    function calcolaEvoluzione() {
+      // Orizzonte temporale generale
+      const maxAnni = Number(slOrizzonte.value);
+
+      // BTP
+      const btpQuota = Number(slBtpQuota.value);
+      const btpRend = Number(slBtpRend.value) / 100;
+      const btpDurata = Number(slBtpDurata.value);
+
+      // PAC
+      const pacInit = Number(slPacUnaTantum.value);
+      const pacMensile = Number(slPacMensile.value);
+      const pacRend = Number(slPacRend.value) / 100;
+
+      // PIR
+      const pirInit = Number(slPirUnaTantum.value);
+      const pirMensile = Number(slPirMensile.value);
+      const pirRend = Number(slPirRend.value) / 100;
+
+      // Aggiornamento etichette testuali
+      lblOrizzonte.textContent = maxAnni + " Anni";
+      lblBtpQuota.textContent = formatEur(btpQuota);
+      lblBtpRend.textContent = Number(slBtpRend.value).toFixed(1) + " %";
+      lblBtpDurata.textContent = btpDurata + " Anni";
+
+      lblPacUnaTantum.textContent = formatEur(pacInit);
+      lblPacMensile.textContent = formatEur(pacMensile) + "/mese";
+      lblPacRend.textContent = Number(slPacRend.value).toFixed(1) + " %";
+
+      lblPirUnaTantum.textContent = formatEur(pirInit);
+      lblPirMensile.textContent = formatEur(pirMensile) + "/mese";
+      lblPirRend.textContent = Number(slPirRend.value).toFixed(1) + " %";
+
+      const labels = [];
+      const dataTotale = [];
+      const dataBtp = [];
+      const dataPac = [];
+      const dataPir = [];
+      const dataTarget = [];
+
+      let pacValore = pacInit;
+      let pirValore = pirInit;
+
+      for (let i = 0; i <= maxAnni; i++) {
+        let annoCorrente = 2026 + i;
+        labels.push(annoCorrente);
+
+        // 1. Calcolo BTP (crescita composta per la sua durata, poi mantiene il valore o si ferma)
+        let btpValore = 0;
+        let annoBtpAttivo = Math.min(i, btpDurata);
+        btpValore = btpQuota * Math.pow(1 + btpRend, annoBtpAttivo);
+
+        // 2. Calcolo PAC (capitale iniziale + versamenti mensili capitalizzati annualmente)
+        if (i > 0) {
+          let versamentoAnnualePac = pacMensile * 12;
+          pacValore = (pacValore + versamentoAnnualePac) * (1 + pacRend);
+        }
+
+        // 3. Calcolo PIR (capitale iniziale + versamenti mensili capitalizzati annualmente)
+        if (i > 0) {
+          let versamentoAnnualePir = pirMensile * 12;
+          pirValore = (pirValore + versamentoAnnualePir) * (1 + pirRend);
+        }
+
+        let totaleAnno = Math.round(btpValore + pacValore + pirValore);
+
+        dataBtp.push(Math.round(btpValore));
+        dataPac.push(Math.round(pacValore));
+        dataPir.push(Math.round(pirValore));
+        dataTotale.push(totaleAnno);
+        dataTarget.push(1000000);
+      }
+
+      rangeAnniLabel.textContent = `Orizzonte: 2026 - ${2026 + maxAnni} | Target fisso: 1.000.000 €`;
+
+      aggiornaGrafico(labels, dataTotale, dataBtp, dataPac, dataPir, dataTarget);
+    }
+
+    function aggiornaGrafico(labels, totale, btp, pac, pir, target) {
+      const ctx = document.getElementById("simulationChart").getContext("2d");
+
+      if (myChart) {
+        myChart.destroy();
+      }
+
+      myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: 'Patrimonio Totale',
+              data: totale,
+              borderColor: '#22c55e',
+              backgroundColor: 'rgba(34, 197, 94, 0.05)',
+              borderWidth: 3,
+              fill: true,
+              tension: 0.2
+            },
+            {
+              label: 'Valore BTP',
+              data: btp,
+              borderColor: '#f97316',
+              borderWidth: 2,
+              tension: 0.2
+            },
+            {
+              label: 'Valore PAC',
+              data: pac,
+              borderColor: '#60a5fa',
+              borderWidth: 2,
+              tension: 0.2
+            },
+            {
+              label: 'Valore PIR',
+              data: pir,
+              borderColor: '#a855f7',
+              borderWidth: 2,
+              tension: 0.2
+            },
+            {
+              label: 'Target €1.000.000',
+              data: target,
+              borderColor: '#94a3b8',
+              borderWidth: 1.5,
+              borderDash: [6, 6],
+              pointRadius: 0
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#94a3b8', font: { family: 'Inter', size: 12 } }
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              callbacks: {
+                label: function(context) {
+                  let label = context.dataset.label || '';
+                  if (label) label += ': ';
+                  if (context.parsed.y !== null) {
+                    label += formatEur(context.parsed.y);
+                  }
+                  return label;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: {
+                color: '#94a3b8',
+                callback: function(value) {
+                  return value >= 1000 ? (value / 1000) + ' k€' : value + ' €';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Associazione eventi a tutti gli slider compreso l'orizzonte
+    const sliders = [
+      slOrizzonte, slBtpQuota, slBtpRend, slBtpDurata,
+      slPacUnaTantum, slPacMensile, slPacRend,
+      slPirUnaTantum, slPirMensile, slPirRend
+    ];
+
+    sliders.forEach(slider => {
+      slider.addEventListener("input", calcolaEvoluzione);
+    });
+
+    // Avvio iniziale
+    calcolaEvoluzione();
+  </script>
+</body>
+</html>
