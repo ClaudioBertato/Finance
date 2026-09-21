@@ -228,6 +228,20 @@
     .pac-record-card form { display: grid; grid-template-columns: 1fr 1fr auto; gap: 12px; align-items: end; }
     .pac-record-card label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
     .pac-record-card input { width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit; }
+    
+    .action-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      margin-right: 4px;
+    }
+    .edit-btn { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .edit-btn:hover { background: rgba(59, 130, 246, 0.4); }
+    .remove-btn { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    .remove-btn:hover { background: rgba(239, 68, 68, 0.4); }
 
     @media (max-width: 1024px) {
       .section-grid { grid-template-columns: 1fr; }
@@ -274,28 +288,30 @@
       <h2>Record PAC</h2>
       <div class="pac-record-grid">
         <div class="pac-record-card">
-          <h3>Aggiorna PAC mensile</h3>
+          <h3 id="monthlyFormTitle">Aggiorna PAC mensile</h3>
           <form id="monthlyPacForm">
+            <input type="hidden" id="monthlyEditIndex" value="-1" />
             <label>Data inizio<input id="monthlyPacDate" type="date" required /></label>
             <label>Importo mensile (€)<input id="monthlyPacAmount" type="number" min="0" step="50" required /></label>
-            <button type="submit">Salva</button>
+            <button type="submit" id="monthlySubmitBtn">Salva</button>
           </form>
         </div>
         <div class="pac-record-card">
-          <h3>Aggiungi una tantum</h3>
+          <h3 id="lumpFormTitle">Aggiungi una tantum</h3>
           <form id="lumpPacForm">
+            <input type="hidden" id="lumpEditIndex" value="-1" />
             <label>Data versamento<input id="lumpPacDate" type="date" required /></label>
             <label>Importo (€)<input id="lumpPacAmount" type="number" min="0" step="100" required /></label>
-            <button type="submit">Aggiungi</button>
+            <button type="submit" id="lumpSubmitBtn">Aggiungi</button>
           </form>
         </div>
       </div>
-      <div class="table-container pac-record-table">
+      <div class="table-container pac-record-table" style="margin-top: 20px;">
         <table>
-          <thead><tr><th>Tipo</th><th>Data</th><th>Importo</th><th></th></tr></thead>
+          <thead><tr><th>Tipo</th><th>Data</th><th>Importo</th><th>Azioni</th></tr></thead>
           <tbody id="pacRecordsBody"></tbody>
         </table>
-        <div class="empty" id="pacEmptyState">Nessun record PAC registrato.</div>
+        <div class="empty" id="pacEmptyState" style="margin-top: 15px; color: var(--muted);">Nessun record PAC registrato.</div>
       </div>
     </section>
 
@@ -407,9 +423,6 @@
         </div>
       </div>
     </div>
-
-
-    
   </main>
 
   <script>
@@ -417,7 +430,6 @@
     const CORE_SHARE = 0.75;
     const SATELLITE_SHARE = 0.25;
 
-    // Mappatura dei link ufficiali JustETF per ciascun ETF
     const etfLinks = {
         "iShares Core MSCI World": "https://www.justetf.com/it/etf-profile.html?isin=IE00B4L5Y983",
         "Amundi MSCI EM Asia": "https://www.justetf.com/it/etf-profile.html?isin=LU1781541849",
@@ -494,28 +506,71 @@
           <td>${typeLabel}</td>
           <td>${formatRecordDate(record.date)}</td>
           <td>${EUR.format(record.amount)}${record.type === "monthly" ? "/mese" : ""}</td>
-          <td><button class="remove" type="button" data-pac-index="${index}">Elimina</button></td>
+          <td>
+            <button class="action-btn edit-btn" type="button" data-edit-index="${index}">Modifica</button>
+            <button class="action-btn remove-btn" type="button" data-remove-index="${index}">Elimina</button>
+          </td>
         `;
         pacRecordsBody.appendChild(row);
       });
 
-      pacRecordsBody.querySelectorAll("[data-pac-index]").forEach(button => {
+      // Gestione tasto Elimina
+      pacRecordsBody.querySelectorAll("[data-remove-index]").forEach(button => {
         button.addEventListener("click", () => {
-          pacRecords.splice(Number(button.dataset.pacIndex), 1);
+          pacRecords.splice(Number(button.dataset.removeIndex), 1);
           savePacRecords();
           renderPacRecords();
           refreshPacCalculations();
+        });
+      });
+
+      // Gestione tasto Modifica
+      pacRecordsBody.querySelectorAll("[data-edit-index]").forEach(button => {
+        button.addEventListener("click", () => {
+          const idx = Number(button.dataset.editIndex);
+          const record = pacRecords[idx];
+
+          if (record.type === "monthly") {
+            document.getElementById("monthlyEditIndex").value = idx;
+            document.getElementById("monthlyPacDate").value = record.date;
+            document.getElementById("monthlyPacAmount").value = record.amount;
+            document.getElementById("monthlyFormTitle").textContent = "Modifica PAC mensile";
+            document.getElementById("monthlySubmitBtn").textContent = "Aggiorna";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          } else {
+            document.getElementById("lumpEditIndex").value = idx;
+            document.getElementById("lumpPacDate").value = record.date;
+            document.getElementById("lumpPacAmount").value = record.amount;
+            document.getElementById("lumpFormTitle").textContent = "Modifica una tantum";
+            document.getElementById("lumpSubmitBtn").textContent = "Aggiorna";
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
         });
       });
     }
 
     monthlyPacForm.addEventListener("submit", event => {
       event.preventDefault();
-      pacRecords.push({
-        type: "monthly",
-        date: document.getElementById("monthlyPacDate").value,
-        amount: Number(document.getElementById("monthlyPacAmount").value)
-      });
+      const editIndex = Number(document.getElementById("monthlyEditIndex").value);
+      const dateVal = document.getElementById("monthlyPacDate").value;
+      const amountVal = Number(document.getElementById("monthlyPacAmount").value);
+
+      if (editIndex >= 0) {
+        // Modifica record esistente
+        pacRecords[editIndex].date = dateVal;
+        pacRecords[editIndex].amount = amountVal;
+        document.getElementById("monthlyEditIndex").value = -1;
+        document.getElementById("monthlyFormTitle").textContent = "Aggiorna PAC mensile";
+        document.getElementById("monthlySubmitBtn").textContent = "Salva";
+      } else {
+        // Aggiungi nuovo record
+        pacRecords.push({
+          type: "monthly",
+          date: dateVal,
+          amount: amountVal
+        });
+      }
+
       pacRecords.sort((a, b) => a.date.localeCompare(b.date));
       savePacRecords();
       renderPacRecords();
@@ -525,11 +580,26 @@
 
     lumpPacForm.addEventListener("submit", event => {
       event.preventDefault();
-      pacRecords.push({
-        type: "lump",
-        date: document.getElementById("lumpPacDate").value,
-        amount: Number(document.getElementById("lumpPacAmount").value)
-      });
+      const editIndex = Number(document.getElementById("lumpEditIndex").value);
+      const dateVal = document.getElementById("lumpPacDate").value;
+      const amountVal = Number(document.getElementById("lumpPacAmount").value);
+
+      if (editIndex >= 0) {
+        // Modifica record esistente
+        pacRecords[editIndex].date = dateVal;
+        pacRecords[editIndex].amount = amountVal;
+        document.getElementById("lumpEditIndex").value = -1;
+        document.getElementById("lumpFormTitle").textContent = "Aggiungi una tantum";
+        document.getElementById("lumpSubmitBtn").textContent = "Aggiungi";
+      } else {
+        // Aggiungi nuovo record
+        pacRecords.push({
+          type: "lump",
+          date: dateVal,
+          amount: amountVal
+        });
+      }
+
       pacRecords.sort((a, b) => a.date.localeCompare(b.date));
       savePacRecords();
       renderPacRecords();
@@ -590,7 +660,6 @@
     const savedSat = localStorage.getItem("sim_satelliteData");
     if (savedSat) { try { satelliteData.splice(0, satelliteData.length, ...JSON.parse(savedSat)); } catch {} }
 
-    // Ricalcola e salva il tasso medio ponderato combinato
     function saveCalculatedEquityReturn() {
       const coreWeighted = portfolioData.reduce((sum, item) => sum + (item.percent / 100) * item.returnRate, 0);
       const satelliteWeighted = satelliteData.reduce((sum, item) => sum + (item.percent / 100) * item.returnRate, 0);
