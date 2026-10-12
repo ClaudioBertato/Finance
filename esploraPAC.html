@@ -229,6 +229,18 @@
     .pac-record-card label { display: grid; gap: 6px; color: var(--muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
     .pac-record-card input { width: 100%; padding: 10px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 9px; font: inherit; }
     
+    .add-etf-box {
+      margin-top: 16px;
+      padding: 14px;
+      background: rgba(255,255,255,.02);
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+    }
+    .add-etf-box h4 { margin: 0 0 10px; font-size: 13px; color: var(--accent); }
+    .add-etf-form { display: grid; grid-template-columns: 2fr 1.5fr 1fr 1fr auto; gap: 8px; align-items: end; }
+    .add-etf-form label { display: grid; gap: 4px; color: var(--muted); font-size: 10px; font-weight: 700; text-transform: uppercase; }
+    .add-etf-form input { width: 100%; padding: 8px; color: var(--text); background: var(--panel-2); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+
     .action-btn {
       padding: 6px 10px;
       border-radius: 6px;
@@ -246,7 +258,7 @@
     @media (max-width: 1024px) {
       .section-grid { grid-template-columns: 1fr; }
       header { flex-direction: column; align-items: flex-start; gap: 16px; }
-      .deposit-info-box, .pac-record-grid { grid-template-columns: 1fr; }
+      .deposit-info-box, .pac-record-grid, .add-etf-form { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -319,7 +331,7 @@
       <div class="panel">
         <div class="panel-title">
           <h2>Portafoglio Core</h2>
-          <span>75% del PAC · 4 ETF</span>
+          <span>75% del PAC</span>
         </div>
 
         <div class="table-container">
@@ -331,6 +343,7 @@
                 <th>Valore (€)</th>
                 <th>Rend. Annuo</th>
                 <th>Stima Teorica 12 Mesi</th>
+                <th>Azioni</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -341,9 +354,21 @@
                 <td id="totalNumeric">€0</td>
                 <td id="avgReturn">—</td>
                 <td id="totalNet">—</td>
+                <td></td>
               </tr>
             </tfoot>
           </table>
+        </div>
+
+        <div class="add-etf-box">
+          <h4>Aggiungi nuovo ETF al Core</h4>
+          <form id="addCoreForm" class="add-etf-form">
+            <label>Nome ETF<input type="text" id="coreNewName" placeholder="es. iShares MSCI World" required /></label>
+            <label>Link JustETF (o ISIN)<input type="text" id="coreNewLink" placeholder="https://www.justetf.com/..." required /></label>
+            <label>Peso %<input type="number" id="coreNewPercent" placeholder="10" step="0.5" min="0" max="100" required /></label>
+            <label>Rend. %<input type="number" id="coreNewReturn" placeholder="7.5" step="0.1" required /></label>
+            <button type="submit" class="btn-link" style="padding: 8px 12px; font-size: 11px;">Aggiungi</button>
+          </form>
         </div>
 
         <div class="deposit-info-box">
@@ -385,7 +410,7 @@
       <div class="panel">
         <div class="panel-title">
           <h2>Portafoglio Satellite</h2>
-          <span>25% del PAC · 3 ETF</span>
+          <span>25% del PAC</span>
         </div>
 
         <div class="table-container">
@@ -397,6 +422,7 @@
                 <th>Valore (€)</th>
                 <th>Rend. Annuo</th>
                 <th>Stima Teorica 12 Mesi</th>
+                <th>Azioni</th>
               </tr>
             </thead>
             <tbody id="satelliteTableBody"></tbody>
@@ -407,9 +433,21 @@
                 <td id="satelliteTotalNumeric">€0</td>
                 <td id="satelliteAvgReturn">—</td>
                 <td id="satelliteTotalNet">—</td>
+                <td></td>
               </tr>
             </tfoot>
           </table>
+        </div>
+
+        <div class="add-etf-box">
+          <h4>Aggiungi nuovo ETF al Satellite</h4>
+          <form id="addSatForm" class="add-etf-form">
+            <label>Nome ETF<input type="text" id="satNewName" placeholder="es. iShares NASDAQ-100" required /></label>
+            <label>Link JustETF (o ISIN)<input type="text" id="satNewLink" placeholder="https://www.justetf.com/..." required /></label>
+            <label>Peso %<input type="number" id="satNewPercent" placeholder="10" step="0.5" min="0" max="100" required /></label>
+            <label>Rend. %<input type="number" id="satNewReturn" placeholder="10" step="0.1" required /></label>
+            <button type="submit" class="btn-link" style="padding: 8px 12px; font-size: 11px;">Aggiungi</button>
+          </form>
         </div>
       </div>
 
@@ -514,7 +552,6 @@
         pacRecordsBody.appendChild(row);
       });
 
-      // Gestione tasto Elimina
       pacRecordsBody.querySelectorAll("[data-remove-index]").forEach(button => {
         button.addEventListener("click", () => {
           pacRecords.splice(Number(button.dataset.removeIndex), 1);
@@ -524,7 +561,6 @@
         });
       });
 
-      // Gestione tasto Modifica
       pacRecordsBody.querySelectorAll("[data-edit-index]").forEach(button => {
         button.addEventListener("click", () => {
           const idx = Number(button.dataset.editIndex);
@@ -556,14 +592,12 @@
       const amountVal = Number(document.getElementById("monthlyPacAmount").value);
 
       if (editIndex >= 0) {
-        // Modifica record esistente
         pacRecords[editIndex].date = dateVal;
         pacRecords[editIndex].amount = amountVal;
         document.getElementById("monthlyEditIndex").value = -1;
         document.getElementById("monthlyFormTitle").textContent = "Aggiorna PAC mensile";
         document.getElementById("monthlySubmitBtn").textContent = "Salva";
       } else {
-        // Aggiungi nuovo record
         pacRecords.push({
           type: "monthly",
           date: dateVal,
@@ -585,14 +619,12 @@
       const amountVal = Number(document.getElementById("lumpPacAmount").value);
 
       if (editIndex >= 0) {
-        // Modifica record esistente
         pacRecords[editIndex].date = dateVal;
         pacRecords[editIndex].amount = amountVal;
         document.getElementById("lumpEditIndex").value = -1;
         document.getElementById("lumpFormTitle").textContent = "Aggiungi una tantum";
         document.getElementById("lumpSubmitBtn").textContent = "Aggiungi";
       } else {
-        // Aggiungi nuovo record
         pacRecords.push({
           type: "lump",
           date: dateVal,
@@ -685,6 +717,8 @@
     let chart;
     let satelliteChart;
 
+    const colorsPalette = ["#3b82f6", "#ef4444", "#f59e0b", "#22c55e", "#38bdf8", "#a855f7", "#ec4899", "#10b981", "#6366f1"];
+
     function renderTable() {
       tableBody.innerHTML = "";
       let sumPercent = 0;
@@ -704,13 +738,18 @@
         sumNet += netEstimated;
 
         const tr = document.createElement("tr");
-        const etfUrl = etfLinks[item.name] || 'https://www.justetf.com/it/search.html?query=' + encodeURIComponent(item.name);
+        let etfUrl = item.link || etfLinks[item.name] || 'https://www.justetf.com/it/search.html?query=' + encodeURIComponent(item.name);
+        if (etfUrl && !etfUrl.startsWith('http')) {
+          etfUrl = 'https://www.justetf.com/it/etf-profile.html?isin=' + etfUrl;
+        }
+
         tr.innerHTML = `
           <td class="asset-name"><a href="${etfUrl}" target="_blank" title="Visualizza andamento su JustETF">${item.name}</a></td>
           <td><input type="number" class="table-input" value="${item.percent.toFixed(2)}" step="0.5" min="0" max="100" data-index="${index}" data-field="percent"> %</td>
           <td>${EUR.format(assetValue)}</td>
           <td><input type="number" class="table-input" value="${item.returnRate.toFixed(1)}" step="0.1" data-index="${index}" data-field="returnRate"> %</td>
           <td>${EUR.format(netEstimated)}</td>
+          <td><button class="action-btn remove-btn" type="button" data-core-remove="${index}">Elimina</button></td>
         `;
         tableBody.appendChild(tr);
       });
@@ -727,6 +766,15 @@
           const idx = Number(e.target.dataset.index);
           const field = e.target.dataset.field;
           portfolioData[idx][field] = parseFloat(e.target.value) || 0;
+          renderTable();
+          updateChart();
+        });
+      });
+
+      tableBody.querySelectorAll("[data-core-remove]").forEach(button => {
+        button.addEventListener("click", (e) => {
+          const idx = Number(e.target.dataset.coreRemove);
+          portfolioData.splice(idx, 1);
           renderTable();
           updateChart();
         });
@@ -751,13 +799,18 @@
         sumNet += netEstimated;
 
         const tr = document.createElement("tr");
-        const etfUrl = etfLinks[item.name] || 'https://www.justetf.com/it/search.html?query=' + encodeURIComponent(item.name);
+        let etfUrl = item.link || etfLinks[item.name] || 'https://www.justetf.com/it/search.html?query=' + encodeURIComponent(item.name);
+        if (etfUrl && !etfUrl.startsWith('http')) {
+          etfUrl = 'https://www.justetf.com/it/etf-profile.html?isin=' + etfUrl;
+        }
+
         tr.innerHTML = `
           <td class="asset-name"><a href="${etfUrl}" target="_blank" title="Visualizza andamento su JustETF">${item.name}</a></td>
           <td><input type="number" class="table-input" value="${item.percent.toFixed(2)}" step="0.5" min="0" max="100" data-index="${index}" data-field="percent"> %</td>
           <td>${EUR.format(assetValue)}</td>
           <td><input type="number" class="table-input" value="${item.returnRate.toFixed(1)}" step="0.1" data-index="${index}" data-field="returnRate"> %</td>
           <td>${EUR.format(netEstimated)}</td>
+          <td><button class="action-btn remove-btn" type="button" data-sat-remove="${index}">Elimina</button></td>
         `;
         satelliteTableBody.appendChild(tr);
       });
@@ -778,7 +831,52 @@
           updateSatelliteChart();
         });
       });
+
+      satelliteTableBody.querySelectorAll("[data-sat-remove]").forEach(button => {
+        button.addEventListener("click", (e) => {
+          const idx = Number(e.target.dataset.satRemove);
+          satelliteData.splice(idx, 1);
+          renderSatelliteTable();
+          updateSatelliteChart();
+        });
+      });
     }
+
+    document.getElementById("addCoreForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("coreNewName").value.trim();
+      let link = document.getElementById("coreNewLink").value.trim();
+      const percent = parseFloat(document.getElementById("coreNewPercent").value) || 0;
+      const returnRate = parseFloat(document.getElementById("coreNewReturn").value) || 0;
+
+      if (!link.startsWith("http")) {
+        link = "https://www.justetf.com/it/etf-profile.html?isin=" + link;
+      }
+
+      const color = colorsPalette[portfolioData.length % colorsPalette.length];
+      portfolioData.push({ name, link, percent, returnRate, color });
+      document.getElementById("addCoreForm").reset();
+      renderTable();
+      updateChart();
+    });
+
+    document.getElementById("addSatForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("satNewName").value.trim();
+      let link = document.getElementById("satNewLink").value.trim();
+      const percent = parseFloat(document.getElementById("satNewPercent").value) || 0;
+      const returnRate = parseFloat(document.getElementById("satNewReturn").value) || 0;
+
+      if (!link.startsWith("http")) {
+        link = "https://www.justetf.com/it/etf-profile.html?isin=" + link;
+      }
+
+      const color = colorsPalette[(satelliteData.length + 4) % colorsPalette.length];
+      satelliteData.push({ name, link, percent, returnRate, color });
+      document.getElementById("addSatForm").reset();
+      renderSatelliteTable();
+      updateSatelliteChart();
+    });
 
     function initChart() {
       const ctx = document.getElementById("allocationChart").getContext("2d");
@@ -788,7 +886,7 @@
           labels: portfolioData.map(i => i.name),
           datasets: [{
             data: portfolioData.map(i => i.percent),
-            backgroundColor: portfolioData.map(i => i.color),
+            backgroundColor: portfolioData.map((i, idx) => i.color || colorsPalette[idx % colorsPalette.length]),
             borderWidth: 2,
             borderColor: "#11182c"
           }]
@@ -809,6 +907,7 @@
       if (chart) {
         chart.data.labels = portfolioData.map(i => i.name);
         chart.data.datasets[0].data = portfolioData.map(i => i.percent);
+        chart.data.datasets[0].backgroundColor = portfolioData.map((i, idx) => i.color || colorsPalette[idx % colorsPalette.length]);
         chart.update();
       }
     }
@@ -821,7 +920,7 @@
           labels: satelliteData.map(item => item.name),
           datasets: [{
             data: satelliteData.map(item => item.percent),
-            backgroundColor: satelliteData.map(item => item.color),
+            backgroundColor: satelliteData.map((item, idx) => item.color || colorsPalette[(idx + 4) % colorsPalette.length]),
             borderWidth: 2,
             borderColor: "#11182c"
           }]
@@ -839,7 +938,9 @@
 
     function updateSatelliteChart() {
       if (satelliteChart) {
+        satelliteChart.data.labels = satelliteData.map(item => item.name);
         satelliteChart.data.datasets[0].data = satelliteData.map(item => item.percent);
+        satelliteChart.data.datasets[0].backgroundColor = satelliteData.map((item, idx) => item.color || colorsPalette[(idx + 4) % colorsPalette.length]);
         satelliteChart.update();
       }
     }
